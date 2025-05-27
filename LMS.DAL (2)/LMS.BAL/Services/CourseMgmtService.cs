@@ -71,7 +71,7 @@ namespace LMS.BAL.Services
                 else
                 {
                     m.CourseName = req.CourseName;
-                    m.ContactNumber = req.CourseName;
+                    m.ContactNumber = req.ContactNumber;
                     m.Description = req.Description;
                     m.CourseImgURL = req.CourseImgURL;
                     m.CourseCode = req.CourseCode;
