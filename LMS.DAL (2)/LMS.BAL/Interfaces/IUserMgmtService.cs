@@ -17,6 +17,7 @@ namespace LMS.BAL.Interfaces
         #region User Mgmt
        // GenericResponse AddEditModule(UserDTO req, int currentUserId);
         List<UsertDTO> GetUserTypDD();
+        List<UsersDTO> GetUsersListDropDown();
         List<UserListDTO> GetUsersList(string search = "");
         UserEntity GetUserById(int id);
         GenericResponse DeleteUser(int id, int currentUserId);

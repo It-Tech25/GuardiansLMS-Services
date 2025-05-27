@@ -181,6 +181,22 @@ namespace LMS.DAL.Repositories
             catch (Exception ex) { }
             return response;
         }
+        public List<UsersDTO> GetUsersListDropDown()
+        {
+            List<UsersDTO> response = new List<UsersDTO>();
+            try
+            {
+                response = (from m in context.userEntities
+                            where m.IsDeleted == false 
+                            select new UsersDTO
+                            {
+                                UserId = m.UserId,
+                                UserName = m.UserName
+                            }).ToList();
+            }
+            catch (Exception ex) { }
+            return response;
+        }
 
         public List<UsertDTO> GetUserTypDD()
         {

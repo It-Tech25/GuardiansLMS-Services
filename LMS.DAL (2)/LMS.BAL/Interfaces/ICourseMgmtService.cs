@@ -13,7 +13,7 @@ namespace LMS.BAL.Interfaces
 
 
         List<CourseTypesDTO> GetCourseTypeList(string search = "");
-
+        List<CourseDropdownDTO> GetCourseListDropDown();
         List<CourseTypeDTO> GetCourseType();
         CourseTypeByIdDTO GetCourseTypeById(int id);
         GenericResponse AddEditModule(CourseTypesDTO req, int currentUserId);

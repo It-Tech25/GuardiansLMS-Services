@@ -17,6 +17,7 @@ namespace LMS.DAL.Interfaces
 
         #region User Mgmt
         GenericResponse UpdateUser(UserEntity req);
+        List<UsersDTO> GetUsersListDropDown();
         GenericResponse AddUser(UserEntity req);
         
         List<UsertDTO> GetUserTypDD();

@@ -65,5 +65,13 @@ namespace LMS.Components.ModelClasses.CourseType
 
 
     }
+    public class CourseDropdownDTO
+    {
+        public int CourseId { get; set; }
+        public string CourseName { get; set; }
+  
+
+
+    }
 
 }

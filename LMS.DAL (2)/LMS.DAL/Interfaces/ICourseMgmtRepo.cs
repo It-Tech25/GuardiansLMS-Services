@@ -14,6 +14,7 @@ namespace LMS.DAL.Interfaces
         #region Course Type
 
         List<CourseTypesDTO> GetCourseTypeList(string search = "");
+        List<CourseDropdownDTO> GetCourseListDropDown();
         List<CourseTypeDTO> GetCourseType();
         CourseTypeByIdDTO GetCourseTypeById(int id);
         CourseTypesEntity GetCourseTypesById(int id);

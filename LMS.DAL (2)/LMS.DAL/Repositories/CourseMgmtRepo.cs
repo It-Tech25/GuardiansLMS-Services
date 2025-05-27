@@ -45,6 +45,23 @@ namespace LMS.DAL.Repositories
             catch (Exception ex) { }
             return response;
         }
+        public List<CourseDropdownDTO> GetCourseListDropDown()
+        {
+            List<CourseDropdownDTO> response = new List<CourseDropdownDTO>();
+            try
+            {
+                response = (from m in context.courseTypes
+                            where m.IsDeleted == false
+                            select new CourseDropdownDTO
+                            {
+                                CourseId = m.CourseId,
+                                CourseName = m.CourseName,
+                               
+                            }).ToList();
+            }
+            catch (Exception ex) { }
+            return response;
+        }
 
         public List<CourseTypeDTO> GetCourseType()
         {

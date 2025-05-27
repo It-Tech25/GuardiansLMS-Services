@@ -69,4 +69,10 @@ namespace LMS.Components.ModelClasses.UserDTOs
         public string? UserTypeName { get; set; } 
         public int? UserType { get; set; }
     }
+    public class UsersDTO
+    {
+
+        public string? UserName { get; set; }
+        public int? UserId { get; set; }
+    }
 }

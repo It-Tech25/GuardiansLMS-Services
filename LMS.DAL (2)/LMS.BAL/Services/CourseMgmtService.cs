@@ -22,6 +22,10 @@ namespace LMS.BAL.Services
         {
             return mRepo.GetCourseTypeList(search);
         }
+        public List<CourseDropdownDTO> GetCourseListDropDown()
+        {
+            return mRepo.GetCourseListDropDown();
+        }
 
         public List<CourseTypeDTO> GetCourseType()
         {

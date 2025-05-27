@@ -95,6 +95,10 @@ namespace LMS.BAL.Services
         {
             return uRepo.GetUsersList(search);
         }
+        public List<UsersDTO> GetUsersListDropDown()
+        {
+            return uRepo.GetUsersListDropDown();
+        }
 
         public List<UsertDTO> GetUserTypDD()
         {
