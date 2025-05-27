@@ -182,12 +182,12 @@ namespace LMS.DAL.Repositories
             return response;
         }
         public List<UsersDTO> GetUsersListDropDown()
-        {
+        { int id = context.userTypes.Where(a => a.UserTypeName == "Student" && a.IsDeleted == false).Select(a => a.UserTypeId).FirstOrDefault();
             List<UsersDTO> response = new List<UsersDTO>();
             try
             {
                 response = (from m in context.userEntities
-                            where m.IsDeleted == false 
+                            where m.IsDeleted == false && m.UserType==id
                             select new UsersDTO
                             {
                                 UserId = m.UserId,

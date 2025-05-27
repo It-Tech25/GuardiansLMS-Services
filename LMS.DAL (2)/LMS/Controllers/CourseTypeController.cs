@@ -36,18 +36,7 @@ namespace LMS.Controllers
 
             return Ok(finalResponse);
         }
-        [HttpGet("GetCourseDropDown")]
-        public async Task<IActionResult> GetCourseListDropDown()
-        {
-            List<CourseDropdownDTO> res = new List<CourseDropdownDTO>();
-            res = mService.GetCourseListDropDown();
-
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            finalResponse.Succeded = true;
-            finalResponse.totalRecords = res.Count();
-
-            return Ok(finalResponse);
-        }
+       
 
         [HttpGet("GetCourseById")]
         public async Task<IActionResult> GetCourseById(int id)

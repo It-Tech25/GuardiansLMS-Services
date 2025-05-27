@@ -14,7 +14,8 @@ namespace LMS.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize]    public class UserMgmtController : Controller
+    [Authorize]    
+    public class UserMgmtController : Controller
     {
         private readonly IUserMgmtService uService; 
         private readonly IConfiguration config;
@@ -26,18 +27,7 @@ namespace LMS.Controllers
         }
 
 
-        [HttpGet("GetUsertypeDropDown")]
-        public async Task<IActionResult> GetUsertypeDropDown()
-        {
-            List<UsertDTO> res = new List<UsertDTO>();
-            res = uService.GetUserTypeDD();
-
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            finalResponse.Succeded = true;
-            finalResponse.totalRecords = res.Count();
-
-            return Ok(finalResponse);
-        }
+        
 
         [HttpGet("GetUsersList")]
         public async Task<IActionResult> GetUsersList(string search = "")
