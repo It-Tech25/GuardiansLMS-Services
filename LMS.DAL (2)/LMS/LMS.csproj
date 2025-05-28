@@ -17,12 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LMS.BAL\LMS.BAL.csproj" />
-    <ProjectReference Include="..\LMS.Components\LMS.Components.csproj" />
-    <ProjectReference Include="..\LMS.DAL\LMS.DAL.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="UploadedFiles\" />
   </ItemGroup>
 
