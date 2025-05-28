@@ -117,18 +117,22 @@ namespace LMS.DAL.Repositories
 
         public IEnumerable<FeeCollectionDto> GetAllFees()
         {
-            return context.FeeCollections
-                .Where(f => !f.IsDeleted)
-                .Select(f => new FeeCollectionDto
-                {
-                    FeeId = f.FeeId,
-                    StudentId = f.StudentId,
-                    Amount = f.Amount,
-                    PaymentDate = f.PaymentDate,
-                    PaymentMode = f.PaymentMode,
-                    Remarks = f.Remarks,
-                    CreatedBy = f.CreatedBy
-                }).ToList();
+            var result = (from f in context.FeeCollections
+                          join s in context.Students on f.StudentId equals s.StudentId
+                          join u in context.userEntities on s.UserId equals u.UserId
+                          where !f.IsDeleted
+                          select new FeeCollectionDto
+                          {
+                              FeeId = f.FeeId,
+                              uid = s.UserId,
+                              StudentName = u.UserName,
+                              Amount = f.Amount,
+                              PaymentDate = f.PaymentDate,
+                              PaymentMode = f.PaymentMode,
+                              Remarks = f.Remarks,
+                              CreatedBy = f.CreatedBy
+                          }).ToList();
+            return result;
         }
 
         public FeeCollectionDto GetFeeById(int feeId)

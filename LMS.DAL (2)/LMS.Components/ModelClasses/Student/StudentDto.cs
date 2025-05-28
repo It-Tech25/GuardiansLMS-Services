@@ -12,6 +12,10 @@ namespace LMS.Components.ModelClasses.Student
         public int UserId { get; set; }
         public int CourseId { get; set; }
         public int CreatedBy { get; set; }
+
+        public string StudentName {  get; set; }
+        public string CourseName { get; set; }
+        public string Created { get; set; }
     }
 
 }

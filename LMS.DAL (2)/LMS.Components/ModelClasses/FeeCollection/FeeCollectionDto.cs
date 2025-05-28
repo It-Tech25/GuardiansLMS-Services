@@ -14,7 +14,9 @@ namespace LMS.Components.ModelClasses.FeeCollection
         public DateTime PaymentDate { get; set; }
         public string PaymentMode { get; set; }
         public string Remarks { get; set; }
+        public string StudentName { get; set; }
         public int CreatedBy { get; set; }
+        public int uid { get; set; }
     }
 
 }

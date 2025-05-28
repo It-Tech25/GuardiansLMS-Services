@@ -111,15 +111,16 @@ namespace LMS.DAL.Repositories
 
         public IEnumerable<StudentDto> GetAllStudents()
         {
-            return context.Students
-                .Where(s => !s.IsDeleted)
-                .Select(s => new StudentDto
-                {
-                    StudentId = s.StudentId,
-                    UserId = s.UserId,
-                    CourseId = s.CourseId,
-                    CreatedBy = s.CreatedBy
-                }).ToList();
+            var res = context.Students
+                 .Where(s => !s.IsDeleted)
+                 .Select(s => new StudentDto
+                 {
+                     StudentId = s.StudentId,
+                     StudentName = context.userEntities.Where(a=>a.UserId==s.UserId).Select(a=>a.UserName).FirstOrDefault(),
+                     CourseName = context.courseTypes.Where(a => a.CourseId == s.CourseId).Select(a => a.CourseName).FirstOrDefault(),
+                     Created = context.userEntities.Where(a => a.UserId == s.CreatedBy).Select(a => a.UserName).FirstOrDefault()
+                 }).ToList();
+            return res;
         }
 
         public StudentDto GetStudentById(int studentId)
