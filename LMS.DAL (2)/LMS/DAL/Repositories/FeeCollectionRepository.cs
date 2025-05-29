@@ -115,13 +115,13 @@ namespace LMS.DAL.Repositories
             return res;
         }
 
-        public IEnumerable<FeeCollectionDto> GetAllFees()
+        public IEnumerable<FeeCollectionsDto> GetAllFees()
         {
             var result = (from f in context.FeeCollections
                           join s in context.Students on f.StudentId equals s.StudentId
                           join u in context.userEntities on s.UserId equals u.UserId
                           where !f.IsDeleted
-                          select new FeeCollectionDto
+                          select new FeeCollectionsDto
                           {
                               FeeId = f.FeeId,
                               uid = s.UserId,
@@ -129,26 +129,28 @@ namespace LMS.DAL.Repositories
                               Amount = f.Amount,
                               PaymentDate = f.PaymentDate,
                               PaymentMode = f.PaymentMode,
-                              Remarks = f.Remarks,
-                              CreatedBy = f.CreatedBy
+                              Remarks = f.Remarks
                           }).ToList();
             return result;
         }
 
-        public FeeCollectionDto GetFeeById(int feeId)
+        public FeeCollectionsDto GetFeeById(int feeId)
         {
-            return context.FeeCollections
-                .Where(f => f.FeeId == feeId && !f.IsDeleted)
-                .Select(f => new FeeCollectionDto
-                {
-                    FeeId = f.FeeId,
-                    StudentId = f.StudentId,
-                    Amount = f.Amount,
-                    PaymentDate = f.PaymentDate,
-                    PaymentMode = f.PaymentMode,
-                    Remarks = f.Remarks,
-                    CreatedBy = f.CreatedBy
-                }).FirstOrDefault();
+            var result = (from f in context.FeeCollections
+                          join s in context.Students on f.StudentId equals s.StudentId
+                          join u in context.userEntities on s.UserId equals u.UserId
+                          where !f.IsDeleted && f.FeeId==feeId
+                          select new FeeCollectionsDto
+                          {
+                              FeeId = f.FeeId,
+                              uid = s.UserId,
+                              StudentName = u.UserName,
+                              Amount = f.Amount,
+                              PaymentDate = f.PaymentDate,
+                              PaymentMode = f.PaymentMode,
+                              Remarks = f.Remarks
+                          }).FirstOrDefault();
+            return result;
         }
     }
 

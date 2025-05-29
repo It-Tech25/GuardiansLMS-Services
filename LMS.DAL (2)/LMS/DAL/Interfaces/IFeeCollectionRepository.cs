@@ -13,8 +13,8 @@ namespace LMS.DAL.Interfaces
         GenericResponse AddFee(FeeCollectionDto dto);
         GenericResponse UpdateFee(FeeCollectionDto dto, int userId);
         GenericResponse DeleteFee(int feeId, int userId);
-        IEnumerable<FeeCollectionDto> GetAllFees();
-        FeeCollectionDto GetFeeById(int feeId);
+        IEnumerable<FeeCollectionsDto> GetAllFees();
+        FeeCollectionsDto GetFeeById(int feeId);
     }
 
 }

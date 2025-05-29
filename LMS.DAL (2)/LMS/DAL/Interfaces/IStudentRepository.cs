@@ -13,8 +13,8 @@ namespace LMS.DAL.Interfaces
         GenericResponse AddStudent(StudentDto dto);
         GenericResponse UpdateStudent(StudentDto dto, int userId);
         GenericResponse DeleteStudent(int studentId, int userId);
-        IEnumerable<StudentDto> GetAllStudents();
-        StudentDto GetStudentById(int studentId);
+        IEnumerable<StudentsDto> GetAllStudents();
+        StudentsDto GetStudentById(int studentId);
     }
 
 }

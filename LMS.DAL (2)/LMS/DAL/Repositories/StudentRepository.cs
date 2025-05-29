@@ -109,31 +109,36 @@ namespace LMS.DAL.Repositories
             return res;
         }
 
-        public IEnumerable<StudentDto> GetAllStudents()
+        public IEnumerable<StudentsDto> GetAllStudents()
         {
             var res = context.Students
                  .Where(s => !s.IsDeleted)
-                 .Select(s => new StudentDto
+                 .Select(s => new StudentsDto
                  {
                      StudentId = s.StudentId,
                      StudentName = context.userEntities.Where(a=>a.UserId==s.UserId).Select(a=>a.UserName).FirstOrDefault(),
+                     MobileNumber = context.userEntities.Where(a => a.UserId == s.UserId).Select(a => a.MobileNumber).FirstOrDefault(),
+                     EmailId = context.userEntities.Where(a => a.UserId == s.UserId).Select(a => a.EmailId).FirstOrDefault(),
                      CourseName = context.courseTypes.Where(a => a.CourseId == s.CourseId).Select(a => a.CourseName).FirstOrDefault(),
                      Created = context.userEntities.Where(a => a.UserId == s.CreatedBy).Select(a => a.UserName).FirstOrDefault()
                  }).ToList();
             return res;
         }
 
-        public StudentDto GetStudentById(int studentId)
+        public StudentsDto GetStudentById(int studentId)
         {
-            return context.Students
-                .Where(s => s.StudentId == studentId && !s.IsDeleted)
-                .Select(s => new StudentDto
-                {
-                    StudentId = s.StudentId,
-                    UserId = s.UserId,
-                    CourseId = s.CourseId,
-                    CreatedBy = s.CreatedBy
-                }).FirstOrDefault();
+            var res = context.Students
+                  .Where(s => !s.IsDeleted && s.StudentId==studentId)
+                  .Select(s => new StudentsDto
+                  {
+                      StudentId = s.StudentId,
+                      StudentName = context.userEntities.Where(a => a.UserId == s.UserId).Select(a => a.UserName).FirstOrDefault(),
+                      MobileNumber = context.userEntities.Where(a => a.UserId == s.UserId).Select(a => a.MobileNumber).FirstOrDefault(),
+                      EmailId = context.userEntities.Where(a => a.UserId == s.UserId).Select(a => a.EmailId).FirstOrDefault(),
+                      CourseName = context.courseTypes.Where(a => a.CourseId == s.CourseId).Select(a => a.CourseName).FirstOrDefault(),
+                      Created = context.userEntities.Where(a => a.UserId == s.CreatedBy).Select(a => a.UserName).FirstOrDefault()
+                  }).FirstOrDefault();
+            return res;
         }
     }
 
