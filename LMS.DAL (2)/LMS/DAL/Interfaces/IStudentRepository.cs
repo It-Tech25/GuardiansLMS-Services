@@ -15,6 +15,7 @@ namespace LMS.DAL.Interfaces
         GenericResponse DeleteStudent(int studentId, int userId);
         IEnumerable<StudentsDto> GetAllStudents();
         StudentsDto GetStudentById(int studentId);
+        List<StudentsDD> GetStudentDropDown();
     }
 
 }

@@ -1,7 +1,9 @@
 ﻿using LMS.BAL.Interfaces;
 using LMS.Components.ModelClasses.CourseType;
+using LMS.Components.ModelClasses.Student;
 using LMS.Components.ModelClasses.UserDTOs;
 using LMS.Components.Utilities;
+using LMS.DAL.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +15,13 @@ namespace LMS.Controllers
     {
         private readonly ICourseMgmtService mService;
         private readonly IUserMgmtService uService;
+        private readonly IStudentRepository repo;
 
-        public CommonController(ICourseMgmtService _mservice, IUserMgmtService uService)
+        public CommonController(ICourseMgmtService _mservice, IUserMgmtService uService,IStudentRepository _repo)
         {
             mService = _mservice;
             this.uService = uService;
+            repo= _repo;
         }
         [HttpGet("GetCourseDropDown")]
         public async Task<IActionResult> GetCourseListDropDown()
@@ -36,6 +40,18 @@ namespace LMS.Controllers
         {
             List<UsertDTO> res = new List<UsertDTO>();
             res = uService.GetUserTypeDD();
+
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            finalResponse.Succeded = true;
+            finalResponse.totalRecords = res.Count();
+
+            return Ok(finalResponse);
+        }
+        [HttpGet("GetStudentDropDown")]
+        public async Task<IActionResult> GetStudentDropDown()
+        {
+            List<StudentsDD> res = new List<StudentsDD>();
+            res = repo.GetStudentDropDown();
 
             var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
             finalResponse.Succeded = true;

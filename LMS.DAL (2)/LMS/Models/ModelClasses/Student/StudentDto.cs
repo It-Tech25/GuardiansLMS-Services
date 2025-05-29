@@ -22,5 +22,10 @@ namespace LMS.Components.ModelClasses.Student
         public string? MobileNumber { get; set; }
         public string? Created { get; set; }
     }
+    public class StudentsDD
+    {
+        public int? StudentId { get; set; } // nullable for Add
+        public string? StudentName { get; set; }
+    }
 
 }

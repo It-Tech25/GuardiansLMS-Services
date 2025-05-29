@@ -1,6 +1,7 @@
 ﻿using LMS.Components.Entities;
 using LMS.Components.ModelClasses.Common;
 using LMS.Components.ModelClasses.Student;
+using LMS.Components.ModelClasses.UserDTOs;
 using LMS.DAL.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -139,6 +140,22 @@ namespace LMS.DAL.Repositories
                       Created = context.userEntities.Where(a => a.UserId == s.CreatedBy).Select(a => a.UserName).FirstOrDefault()
                   }).FirstOrDefault();
             return res;
+        }
+        public List<StudentsDD> GetStudentDropDown()
+        {
+            List<StudentsDD> response = new List<StudentsDD>();
+            try
+            {
+                response = (from m in context.Students
+                            where m.IsDeleted == false
+                            select new StudentsDD
+                            {
+                                StudentId = m.StudentId,
+                                StudentName =context.userEntities.Where(a=>a.UserId== m.UserId).Select(a=>a.UserName).FirstOrDefault(),
+                            }).ToList();
+            }
+            catch (Exception ex) { }
+            return response;
         }
     }
 
