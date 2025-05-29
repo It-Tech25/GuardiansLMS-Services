@@ -18,6 +18,7 @@ namespace LMS.Controllers
 		private readonly IUserMgmtService uService;
 		private readonly ITokenService _tokenService;
 		private readonly IConfiguration config;
+
 		private string? generatedToken = string.Empty;
 		public AuthenticationController(IUserMgmtService userMgmtService, IConfiguration configuration, ITokenService tokenService)
 		{
