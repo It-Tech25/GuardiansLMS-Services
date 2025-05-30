@@ -2,6 +2,7 @@
 using LMS.Components.ModelClasses.Common;
 using LMS.Components.ModelClasses.MasterDTOs;
 using LMS.Components.Utilities;
+using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,17 +25,20 @@ namespace LMS.Controllers
         #region UserTypes
 
         [HttpGet("GetUserTypeList")]
-        public async Task<IActionResult> GetUserTypeList(string search = "")
+        public async Task<IActionResult> GetUserTypeList(string searchterm = "", int pagenumber = 0, int pagesize = 0)
         {
-            List<UserTypeDTO> res = new List<UserTypeDTO>();
-            res = mService.GetUserTypeList(search);
+            List<UserTypeDTO> res = mService.GetUserTypeList(searchterm);
 
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            int skip = (pagenumber - 1) * pagesize;
+            var pagedResult = res.Skip(skip).Take(pagesize).ToList();
+
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(pagedResult);
             finalResponse.Succeded = true;
-            finalResponse.totalRecords = res.Count();
+            finalResponse.totalRecords = res.Count();  
 
             return Ok(finalResponse);
         }
+
 
         [HttpGet("GetUserTypesDD")]
         public async Task<IActionResult> GetUserTypesDD()

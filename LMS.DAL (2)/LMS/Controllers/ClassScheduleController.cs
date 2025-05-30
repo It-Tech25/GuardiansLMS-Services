@@ -3,17 +3,18 @@ using LMS.Components.Entities;
 using LMS.Components.ModelClasses.Common;
 using LMS.Components.ModelClasses.CourseBatch;
 using LMS.DAL.Interfaces;
+using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace LMS.Controllers
 {
-    public class ClassScheduleRepo : IClassScheduleRepo
+    public class ClassScheduleController : Controller
     {
         private readonly MyDbContext context;
         private readonly IMapper mapper;
 
-        public ClassScheduleRepo(MyDbContext context, IMapper mapper)
+        public ClassScheduleController(MyDbContext context, IMapper mapper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -58,12 +59,25 @@ namespace LMS.Controllers
             return new GenericResponse { statusCode = 200, Message = "Schedule deleted" };
         }
 
-        public IEnumerable<ClassScheduleDto> GetAllSchedules()
+        public IEnumerable<ClassScheduleDto> GetAllSchedules(string searchterm="",int pagenumber=0,int pagesize=0)
         {
-            return mapper.Map<IEnumerable<ClassScheduleDto>>(
-                context.ClassSchedule.Where(x => !x.IsDeleted).ToList()
-            );
+            var query = context.ClassSchedule.AsQueryable();
+
+            query = query.Where(x => !x.IsDeleted);
+
+            if (!string.IsNullOrWhiteSpace(searchterm))
+            {
+                var term = searchterm.Trim().ToLower();
+                query = query.Where(x => x.ClassDate.ToLongDateString().Contains(term));
+            }
+
+            int skip = (pagenumber - 1) * pagesize;
+            query = query.Skip(skip).Take(pagesize);
+
+            var list = query.ToList();
+            return mapper.Map<IEnumerable<ClassScheduleDto>>(list);
         }
+
 
         public ClassScheduleDto GetScheduleById(int id)
         {

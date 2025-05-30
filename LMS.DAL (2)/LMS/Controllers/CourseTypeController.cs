@@ -3,6 +3,7 @@ using LMS.Components.ModelClasses.Common;
 using LMS.Components.ModelClasses.CourseType;
 using LMS.Components.ModelClasses.MasterDTOs;
 using LMS.Components.Utilities;
+using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -24,19 +25,32 @@ namespace LMS.Controllers
 
         #region Course
 
-        [HttpGet("GetCourseList")]
-        public async Task<IActionResult> GetCourseList(string search = "")
+       
+        [HttpGet]
+        public IActionResult GetCourseList(string searchterm = "", int pagenumber = 0, int pagesize = 0)
         {
-            List<CourseTypesDTO> res = new List<CourseTypesDTO>();
-            res = mService.GetCourseTypeList(search);
+            var allCourses = mService.GetCourseTypeList(); 
+            var filtered = allCourses.AsQueryable();
 
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            if (!string.IsNullOrWhiteSpace(searchterm))
+            {
+                var term = searchterm.Trim().ToLower();
+                filtered = filtered.Where(x => x.CourseName.ToLower().Contains(term));
+            }
+
+            int skip = (pagenumber - 1) * pagesize;
+            filtered = filtered.Skip(skip).Take(pagesize);
+
+            var finalList = filtered.ToList();
+
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(finalList);
             finalResponse.Succeded = true;
-            finalResponse.totalRecords = res.Count();
+            finalResponse.totalRecords = filtered.Count() + skip; 
 
             return Ok(finalResponse);
         }
-       
+
+
 
         [HttpGet("GetCourseById")]
         public async Task<IActionResult> GetCourseById(int id)

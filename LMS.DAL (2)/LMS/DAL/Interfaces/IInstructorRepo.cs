@@ -15,6 +15,7 @@ namespace LMS.DAL.Interfaces
         GenericResponse DeleteInstructor(int id, int modifiedBy);
         List<InstructorDto> GetAllInstructors();
         InstructorDto GetInstructorById(int id);
+        List<InstructorsDto> GetAllInstructorsDD();
         InstructorProfileDto GetInstructorProfile(int instructorId);
 
     }

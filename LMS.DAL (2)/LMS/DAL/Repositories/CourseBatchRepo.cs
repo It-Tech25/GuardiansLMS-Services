@@ -115,20 +115,33 @@ namespace LMS.DAL.Repositories
             return res;
         }
 
-        public List<CourseBatchDto> GetAllBatches()
+        public List<CourseBatchDtos> GetAllBatches()
         {
-            return context.CourseBatches
-                .Where(x => !x.IsDeleted)
-                .Select(x => new CourseBatchDto
-                {
-                    BatchId = x.BatchId,
-                    CourseId = x.CourseId,
-                    InstructorId = x.InstructorId,
-                    StartDate = x.StartDate,
-                    Duration = x.Duration,
-                    StartTime = x.StartTime,
-                    EndTime = x.EndTime
-                }).ToList();
+             var result = context.CourseBatches
+    .Where(x => !x.IsDeleted)
+    .Select(x => new CourseBatchDtos
+    {
+        BatchId = x.BatchId,
+
+        Course = context.courseTypes
+                    .Where(a => a.CourseId == x.CourseId)
+                    .Select(a => a.CourseName)
+                    .FirstOrDefault(),
+
+        Instructor = context.instructorEntity
+                        .Where(i => i.InstructorId == x.InstructorId)
+                        .Select(i => context.userEntities
+                                    .Where(u => u.UserId == i.UserId)
+                                    .Select(u => u.UserName)
+                                    .FirstOrDefault())
+                        .FirstOrDefault(),
+
+        StartDate = x.StartDate,
+        Duration = x.Duration,
+        StartTime = x.StartTime,
+        EndTime = x.EndTime
+    }).ToList();
+            return result;
         }
     }
 

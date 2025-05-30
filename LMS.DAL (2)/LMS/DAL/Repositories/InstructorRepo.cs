@@ -123,6 +123,17 @@ namespace LMS.DAL.Repositories
                     CreatedBy = x.CreatedBy
                 }).ToList();
         }
+        public List<InstructorsDto> GetAllInstructorsDD()
+        {
+            int id = context.userTypes.Where(a => a.UserTypeName == "Teacher" && a.IsDeleted == false).Select(a => a.UserTypeId).FirstOrDefault();
+            return context.userEntities
+                .Where(x => x.IsDeleted==false && x.UserType==id)
+                .Select(x => new InstructorsDto
+                {
+                    Userid = x.UserId,
+                   Name=context.userEntities.Where(a=>a.UserId==x.UserId).Select(a=>a.UserName).FirstOrDefault(),
+                }).ToList();
+        }
 
         public InstructorDto GetInstructorById(int id)
         {

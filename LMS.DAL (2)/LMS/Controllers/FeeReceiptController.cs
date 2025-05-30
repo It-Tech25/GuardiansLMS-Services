@@ -1,5 +1,6 @@
 ﻿using LMS.Components.ModelClasses.FeeCollection;
 using LMS.DAL.Interfaces;
+using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -40,11 +41,30 @@ namespace LMS.Controllers
         }
 
         [HttpGet("GetAll")]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string searchterm = "", int pagenumber = 0, int pagesize = 0)
         {
-            var response = repo.GetAllReceipts();
+            var allReceipts = repo.GetAllReceipts(); 
+            var filtered = allReceipts.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchterm))
+            {
+                var term =searchterm.Trim().ToLower();
+                filtered = filtered.Where(x => x.ReceiptNumber.ToLower().Contains(term)); 
+            }
+
+            int skip = (pagenumber - 1) * pagesize;
+            var pagedResult = filtered.Skip(skip).Take(pagesize).ToList();
+
+            var response = new
+            {
+                succeeded = true,
+                totalRecords = filtered.Count(),
+                data = pagedResult
+            };
+
             return Ok(response);
         }
+
 
         [HttpGet("GetById/{id}")]
         public IActionResult GetById(int id)

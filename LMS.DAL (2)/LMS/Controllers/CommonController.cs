@@ -1,5 +1,6 @@
 ﻿using LMS.BAL.Interfaces;
 using LMS.Components.ModelClasses.CourseType;
+using LMS.Components.ModelClasses.Instructor;
 using LMS.Components.ModelClasses.Student;
 using LMS.Components.ModelClasses.UserDTOs;
 using LMS.Components.Utilities;
@@ -16,12 +17,14 @@ namespace LMS.Controllers
         private readonly ICourseMgmtService mService;
         private readonly IUserMgmtService uService;
         private readonly IStudentRepository repo;
+        private readonly IInstructorRepo irepo;
 
-        public CommonController(ICourseMgmtService _mservice, IUserMgmtService uService,IStudentRepository _repo)
+        public CommonController(ICourseMgmtService _mservice, IUserMgmtService uService,IStudentRepository _repo,IInstructorRepo _irepo)
         {
             mService = _mservice;
             this.uService = uService;
             repo= _repo;
+            irepo = _irepo;
         }
         [HttpGet("GetCourseDropDown")]
         public async Task<IActionResult> GetCourseListDropDown()
@@ -52,6 +55,18 @@ namespace LMS.Controllers
         {
             List<StudentsDD> res = new List<StudentsDD>();
             res = repo.GetStudentDropDown();
+
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            finalResponse.Succeded = true;
+            finalResponse.totalRecords = res.Count();
+
+            return Ok(finalResponse);
+        }
+        [HttpGet("GetInstructorDropDown")]
+        public async Task<IActionResult> GetInstructorDropDown()
+        {
+            List<InstructorsDto> res = new List<InstructorsDto>();
+            res = irepo.GetAllInstructorsDD();
 
             var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
             finalResponse.Succeded = true;

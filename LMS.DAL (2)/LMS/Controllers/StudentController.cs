@@ -1,5 +1,6 @@
 ﻿using LMS.Components.ModelClasses.Student;
 using LMS.DAL.Interfaces;
+using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -40,11 +41,37 @@ namespace LMS.Controllers
         }
 
         [HttpGet("GetAll")]
-        public IActionResult GetAllStudents()
+        public IActionResult GetAllStudents(string searchterm = "", int pagenumber = 0, int pagesize = 0)
         {
-            var students = repo.GetAllStudents();
-            return Ok(students);
+            var students = repo.GetAllStudents(); 
+
+            var filtered = students.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchterm))
+            {
+                var term = searchterm.Trim().ToLower();
+                filtered = filtered.Where(x =>
+              (!string.IsNullOrEmpty(x.StudentName) && x.StudentName.ToLower().Contains(term)) ||
+            (!string.IsNullOrEmpty(x.EmailId) && x.EmailId.ToLower().Contains(term)) ||
+            (!string.IsNullOrEmpty(x.MobileNumber) && x.MobileNumber.ToLower().Contains(term))
+                );
+            }
+
+            // Apply pagination
+            int skip = (pagenumber - 1) * pagesize;
+            var pagedResult = filtered.Skip(skip).Take(pagesize).ToList();
+
+            // Return paged data with metadata
+            var response = new
+            {
+                succeeded = true,
+                totalRecords = filtered.Count(),
+                data = pagedResult
+            };
+
+            return Ok(response);
         }
+
 
         [HttpGet("GetById/{id}")]
         public IActionResult GetStudentById(int id)

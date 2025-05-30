@@ -1,11 +1,12 @@
 ﻿using LMS.Components.Entities;
-using LMS.Components.ModelClasses.Common;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using LMS.Components.ModelClasses.Instructor;
 using LMS.Components.Entities;
+using LMS.Components.ModelClasses.Common;
+using LMS.Components.ModelClasses.Instructor;
 using LMS.DAL.Interfaces;
 using LMS.DAL.Repositories;
+using LMS.Models.ModelClasses;
+using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace LMS.Controllers
 {
@@ -14,10 +15,12 @@ namespace LMS.Controllers
     public class InstructorController : Controller
     {
         private readonly IInstructorRepo _repo;
+        private readonly MyDbContext context;
 
-        public InstructorController(IInstructorRepo repo)
+        public InstructorController(IInstructorRepo repo, MyDbContext _context)
         {
             _repo = repo;
+            context = _context;
         }
 
         [HttpPost("Add")]
@@ -41,12 +44,45 @@ namespace LMS.Controllers
             return Ok(res);
         }
 
-        [HttpGet("All")]
-        public IActionResult GetAll()
+        [HttpGet("GetAllInstructors")]
+        public IActionResult GetAll(string searchterm = "", int pagenumber = 0, int pagesize = 0)
         {
-            var list = _repo.GetAllInstructors();
-            return Ok(list);
+            var allInstructors = _repo.GetAllInstructors(); 
+            var users = context.userEntities.ToDictionary(u => u.UserId, u => u.UserName);
+            var courses = context.courseTypes.ToDictionary(c => c.CourseId, c => c.CourseName); 
+
+            var enriched = allInstructors.Select(x => new
+            {
+                x.InstructorId,
+                x.UserId,
+                x.CourseId,
+                UserName = users.ContainsKey(x.UserId) ? users[x.UserId] : "",
+                CourseName = courses.ContainsKey(x.CourseId) ? courses[x.CourseId] : ""
+            }).AsQueryable();
+
+            // Search filter
+            if (!string.IsNullOrWhiteSpace(searchterm))
+            {
+                var term = searchterm.Trim().ToLower();
+                enriched = enriched.Where(x =>
+                    (!string.IsNullOrEmpty(x.UserName) && x.UserName.ToLower().Contains(term)) ||
+                    (!string.IsNullOrEmpty(x.CourseName) && x.CourseName.ToLower().Contains(term))
+                );
+            }
+
+            int skip = (pagenumber - 1) * pagesize;
+            var pagedResult = enriched.Skip(skip).Take(pagesize).ToList();
+
+            var response = new
+            {
+                succeeded = true,
+                totalRecords = enriched.Count(),
+                data = pagedResult
+            };
+
+            return Ok(response);
         }
+
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)

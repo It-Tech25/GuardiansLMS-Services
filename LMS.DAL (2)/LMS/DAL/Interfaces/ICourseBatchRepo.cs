@@ -13,7 +13,7 @@ namespace LMS.DAL.Interfaces
         GenericResponse AddBatch(CourseBatchDto dto);
         GenericResponse UpdateBatch(CourseBatchDto dto, int userId);
         GenericResponse DeleteBatch(int batchId, int userId);
-        List<CourseBatchDto> GetAllBatches();
+        List<CourseBatchDtos> GetAllBatches();
     }
 
 }

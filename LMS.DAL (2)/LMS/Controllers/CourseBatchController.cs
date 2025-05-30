@@ -1,5 +1,6 @@
 ﻿using LMS.Components.ModelClasses.CourseBatch;
 using LMS.DAL.Repositories;
+using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -40,11 +41,24 @@ namespace LMS.Controllers
         }
 
         [HttpGet("GetAll")]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string searchterm = "", int pagenumber = 0, int pagesize = 0)
         {
-            var list = _repo.GetAllBatches();
-            return Ok(list);
+            var all = _repo.GetAllBatches(); // returns all batches
+                                             // Apply filtering & pagination here in controller:
+            var filtered = all.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace( searchterm))
+            {
+                var term =  searchterm.Trim().ToLower();
+                filtered = filtered.Where(x => x.Course.ToLower().Contains(term));
+            }
+
+            int skip = (pagenumber - 1) * pagesize;
+            filtered = filtered.Skip(skip).Take(pagesize);
+
+            return Ok(filtered);
         }
+
     }
 
 }

@@ -6,6 +6,7 @@ using LMS.Components.ModelClasses.Common;
 using LMS.Components.ModelClasses.Login;
 using LMS.Components.ModelClasses.MasterDTOs;
 using LMS.Components.Utilities;
+using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,17 +29,23 @@ namespace LMS.Controllers
         #region Module
 
         [HttpGet("GetModulesList")]
-        public async Task<IActionResult> GetModulesList(string search = "")
+        public async Task<IActionResult> GetModulesList(string searchterm = "", int pagenumber = 0, int pagesize = 0)
         {
-            List<ModuleDTO> res = new List<ModuleDTO>();
-            res = mService.GetModulesList(search);
-            
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            // Step 1: Get the full filtered list from the service
+            List<ModuleDTO> res = mService.GetModulesList(searchterm);
+
+            // Step 2: Apply pagination
+            int skip = (pagenumber - 1) * pagesize;
+            var pagedResult = res.Skip(skip).Take(pagesize).ToList();
+
+            // Step 3: Build the API response
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(pagedResult);
             finalResponse.Succeded = true;
-            finalResponse.totalRecords = res.Count();
+            finalResponse.totalRecords = res.Count(); // total before pagination
 
             return Ok(finalResponse);
         }
+
 
         [HttpGet("GetModulesDropDown")]
         public async Task<IActionResult> GetModulesDropDown()
@@ -122,17 +129,20 @@ namespace LMS.Controllers
         #region Sub Module
 
         [HttpGet("GetSubModulesList")]
-        public async Task<IActionResult> GetSubModulesList(int moduleId, string search = "")
+        public async Task<IActionResult> GetSubModulesList(string searchterm = "", int pagenumber = 0, int pagesize = 0, int moduleId=0)
         {
-            List<SubModuleListDTO> res = new List<SubModuleListDTO>();
-            res = mService.GetSubModulesList(moduleId, search);
+            List<SubModuleListDTO> res = mService.GetSubModulesList(moduleId,searchterm);
 
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            int skip = (pagenumber - 1) * pagesize;
+            var pagedResult = res.Skip(skip).Take(pagesize).ToList();
+
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(pagedResult);
             finalResponse.Succeded = true;
-            finalResponse.totalRecords = res.Count();
+            finalResponse.totalRecords = res.Count(); 
 
             return Ok(finalResponse);
         }
+
 
         [HttpGet("GetSubModulesDropDown")]
         public async Task<IActionResult> GetSubModulesDropDown(int moduleId)

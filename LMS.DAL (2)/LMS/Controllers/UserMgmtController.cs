@@ -4,6 +4,7 @@ using LMS.Components.ModelClasses.Common;
 using LMS.Components.ModelClasses.MasterDTOs;
 using LMS.Components.ModelClasses.UserDTOs;
 using LMS.Components.Utilities;
+using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -30,17 +31,20 @@ namespace LMS.Controllers
         
 
         [HttpGet("GetUsersList")]
-        public async Task<IActionResult> GetUsersList(string search = "")
+        public async Task<IActionResult> GetUsersList(string searchterm = "", int pagenumber = 0, int pagesize = 0)
         {
-            List<UserListDTO> res = new List<UserListDTO>();
-            res = uService.GetUsersList(search);
+            List<UserListDTO> res = uService.GetUsersList(searchterm);
 
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            int skip = (pagenumber - 1) * pagesize;
+            var pagedResult = res.Skip(skip).Take(pagesize).ToList();
+
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(pagedResult);
             finalResponse.Succeded = true;
-            finalResponse.totalRecords = res.Count();
+            finalResponse.totalRecords = res.Count(); 
 
             return Ok(finalResponse);
         }
+
         [HttpGet("GetUsersListDropDown")]
         public async Task<IActionResult> GetUsersListDD()
         {
