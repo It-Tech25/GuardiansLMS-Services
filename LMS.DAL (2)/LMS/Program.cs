@@ -75,6 +75,7 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IFeeCollectionRepository, FeeCollectionRepository>();
 builder.Services.AddScoped<IFeeReceiptRepository, FeeReceiptRepository>();
 builder.Services.AddScoped<IClassScheduleRepo, ClassScheduleRepo>();
+builder.Services.AddScoped<ICourseBatchRepo, CourseBatchRepo>();
 
 
 

@@ -1,4 +1,5 @@
 ﻿using LMS.Components.ModelClasses.CourseBatch;
+using LMS.DAL.Interfaces;
 using LMS.DAL.Repositories;
 using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,9 @@ namespace LMS.Controllers
     [ApiController]
     public class CourseBatchController : Controller
     {
-        private readonly CourseBatchRepo _repo;
+        private readonly ICourseBatchRepo _repo;
 
-        public CourseBatchController(CourseBatchRepo repo)
+        public CourseBatchController(ICourseBatchRepo repo)
         {
             _repo = repo;
         }
@@ -41,7 +42,7 @@ namespace LMS.Controllers
         }
 
         [HttpGet("GetAll")]
-        public IActionResult GetAll(string searchterm = "", int pagenumber = 0, int pagesize = 0)
+        public IActionResult GetAll(string searchterm = "", int pagenumber = 1, int pagesize = 10)
         {
             var all = _repo.GetAllBatches(); // returns all batches
                                              // Apply filtering & pagination here in controller:
