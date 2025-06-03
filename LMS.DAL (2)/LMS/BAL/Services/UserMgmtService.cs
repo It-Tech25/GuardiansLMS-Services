@@ -114,6 +114,10 @@ namespace LMS.BAL.Services
         {
             return uRepo.GetUserById(id);
         }
+        public List<UsersDTO> GetSalesDD()
+        {
+            return uRepo.GetSalesDD();
+        }
 
 
         public GenericResponse DeleteUser(int id, int currentUserId)

@@ -11,11 +11,11 @@ namespace LMS.BAL.Interfaces
 		Task<LoginResponse> getUserTokenbyClaim(string? uname);
 		Task<LoginResponse> getUserTokenbyId(int id);
 		Task<(int, string)> updateRefreshToken(string refreshToken, long userId, DateTime refTokenexpDate);
-
+        List<UsersDTO> GetSalesDD();
 
 
         #region User Mgmt
-       // GenericResponse AddEditModule(UserDTO req, int currentUserId);
+        // GenericResponse AddEditModule(UserDTO req, int currentUserId);
         List<UsertDTO> GetUserTypDD();
         List<UsersDTO> GetUsersListDropDown();
         List<UserListDTO> GetUsersList(string search = "");

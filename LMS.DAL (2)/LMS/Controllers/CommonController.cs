@@ -74,5 +74,17 @@ namespace LMS.Controllers
 
             return Ok(finalResponse);
         }
+        [HttpGet("GetSalesDropDown")]
+        public async Task<IActionResult> GetSalesDD()
+        {
+            List<UsersDTO> res = new List<UsersDTO>();
+            res = uService.GetSalesDD();
+
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            finalResponse.Succeded = true;
+            finalResponse.totalRecords = res.Count();
+
+            return Ok(finalResponse);
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace LMS.DAL.Interfaces
         Task<LoginResponse> getUserTokenbyClaim(string? uname);
 		Task<LoginResponse> getUserTokenbyId(int id);
 		Task<(int, string)> updateRefreshToken(string refreshToken, long userId, DateTime refTokenexpDate);
-
+        List<UsersDTO> GetSalesDD();
 
         #region User Mgmt
         GenericResponse UpdateUser(UserEntity req);

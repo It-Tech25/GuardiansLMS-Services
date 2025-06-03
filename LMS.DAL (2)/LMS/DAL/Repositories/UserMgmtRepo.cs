@@ -234,6 +234,24 @@ namespace LMS.DAL.Repositories
             return response;
         }
 
+        public List<UsersDTO> GetSalesDD()
+        {
+            int id = context.userTypes.Where(a => a.UserTypeName == "Sales" && a.IsDeleted == false).Select(a => a.UserTypeId).FirstOrDefault();
+            List<UsersDTO> response = new List<UsersDTO>();
+            try
+            {
+                response = (from m in context.userEntities
+                            where m.IsDeleted == false && m.UserType == id
+                            select new UsersDTO
+                            {
+                                UserId = m.UserId,
+                                UserName = m.UserName
+                            }).ToList();
+            }
+            catch (Exception ex) { }
+            return response;
+        }
+
 
         public GenericResponse AddUser(UserEntity req)
         {
