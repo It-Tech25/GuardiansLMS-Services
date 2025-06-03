@@ -221,6 +221,7 @@ namespace LMS.Controllers
         [HttpPost("update-status")]
         public async Task<IActionResult> UpdateLeadStatus([FromBody] LeadStatusUpdateRequest request)
         {
+            var userId = int.Parse(User.FindFirstValue("UserID"));
             var response = new ApiResponse<object>();
 
             if (request == null || request.LeadId <= 0 || string.IsNullOrEmpty(request.NextStatus) || request.AssignedUserId <= 0)
@@ -249,7 +250,7 @@ namespace LMS.Controllers
             lead.AssignedUserId = request.AssignedUserId;
             lead.StatusId = status.StatusId;
             lead.ModifiedOn = DateTime.Now;
-            lead.ModifiedBy = request.ModifiedBy;
+            lead.ModifiedBy = userId;
 
             var updateResult = await lService.UpdateLeadAsync(lead);
 
