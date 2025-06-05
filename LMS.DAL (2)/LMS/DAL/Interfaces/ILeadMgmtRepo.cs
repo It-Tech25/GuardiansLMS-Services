@@ -20,8 +20,8 @@ namespace LMS.DAL.Interfaces
 
         LeadMaster GetLeadModelByNumber(string number);
 
-       // Task<IEnumerable<AllLeadMasterListDTO>> AllGetLeads(LeadFilterDto filter, int currentUserId);
-        Task<ApiResponse<IEnumerable<AllLeadMasterListDTO>>> AllGetLeads(LeadFilterDto filter, int currentUserId);
+        // Task<IEnumerable<AllLeadMasterListDTO>> AllGetLeads(LeadFilterDto filter, int currentUserId);
+        List<AllLeadMasterListDTO> AllGetLeads(LeadFilterDto filter, int currentUserId);
          Task<ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>>> GetUnassignedLeads(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterAssignedListDTO>>> GetAssignedLeads(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterContactedListDTO>> >GetContactedLeads(LeadFilterDto filter, int currentUserId);
@@ -31,7 +31,7 @@ namespace LMS.DAL.Interfaces
         List<LeadMasterListDTO> GetClossedList(string search = "");
         GenericResponse AddLeadNote(AddLeadNoteDto noteDto);
         GenericResponse UpdateAssignedUser(UpdateLeadStatusDto dto, int uuserId);
-
+        ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>> GetNegotiationList(LeadFilterDto filter);
         Task<ApiResponse<object>> GetNextStatusesAsync(string currentStatus);
         Task<LeadMaster> GetLeadByIdAsync(int leadId);
         Task<CommonStatus> GetStatusByNameAsync(string statusName);

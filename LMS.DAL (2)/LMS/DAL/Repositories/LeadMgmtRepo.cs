@@ -84,6 +84,50 @@ namespace LMS.DAL.Repositories
             return response;
         }
 
+        public ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>> GetNegotiationList(LeadFilterDto filter)
+        {
+            var response = new ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>();
+            try
+            {
+                var leadstatus = context.statusTypes
+                    .FirstOrDefault(l => l.TypeName == "Negotiation" && l.IsDeleted == false);
+
+                if (leadstatus == null)
+                {
+                    response.Succeded = false;
+                    response.Response = new List<LeadMasterQualifiedListDTO>();
+                    return response;
+                }
+
+                var data = (from l in context.leads
+                            join s in context.commonStatuses on l.StatusId equals s.StatusId
+                            join u in context.userEntities on l.AssignedUserId equals u.UserId
+                            where l.IsDeleted == false
+                                  && s.StatusTypeId == leadstatus.TypeId
+                            select new LeadMasterQualifiedListDTO
+                            {
+                                LeadId = l.LeadId,
+                                FromSource = l.FromSource,
+                                MobileNumber = l.MobileNumber,
+                                Email = l.Email,
+                                Name = l.Name,
+                                InterestedCourse = l.InterestedCourse,
+                                AssignedUser = u.UserName
+                            }).ToList();
+
+                response.Succeded = true;
+                response.Response = data;
+            }
+            catch (Exception ex)
+            {
+                response.Succeded = false;
+                response.Response = new List<LeadMasterQualifiedListDTO>();
+            }
+
+            return response;
+        }
+
+
         public EditLeadModel GetLeadById(int id)
         {
             EditLeadModel response = new EditLeadModel();
@@ -264,13 +308,11 @@ namespace LMS.DAL.Repositories
         new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
         new SqlParameter("@Source", filter.Source ?? ""),
         new SqlParameter("@Course", filter.Course ?? ""),
-        new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 },
-        new SqlParameter("@pageSize", filter.PageSize),
-        new SqlParameter("@pageNumber", filter.PageNumber)
+        new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
     };
 
             var finalList = await context.leadMasterUnAssignedListDTO
-                .FromSqlRaw("EXEC dbo.GetLeadsList @userId, @mode, @stage, @startDate, @endDate, @Source, @Course, @assignedTo, @pageSize, @pageNumber", parameters)
+                .FromSqlRaw("EXEC dbo.GetLeadsList @userId, @mode, @stage, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
                 .ToListAsync();
 
             var result = finalList.Select(l => new LeadMasterUnAssignedListDTO
@@ -285,17 +327,10 @@ namespace LMS.DAL.Repositories
                 // AssignedUser = l.AssignedUser
             });
 
-            var totalRecords = finalList.Count; // Ideally, fetch total count from DB for real pagination
-            var fromRecord = (filter.PageNumber - 1) * filter.PageSize + 1;
-            var toRecord = fromRecord + finalList.Count - 1;
-
             var response = new ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>>
             {
                 Response = result,
                 Succeded = true,
-                totalRecords = totalRecords,
-                fromRecord = fromRecord,
-                torecord = toRecord,
                 unReadCount = 0 // Replace with actual unread logic if applicable
             };
 
@@ -304,7 +339,7 @@ namespace LMS.DAL.Repositories
 
 
 
-        public async Task<ApiResponse<IEnumerable<AllLeadMasterListDTO>>> AllGetLeads(LeadFilterDto filter, int currentUserId)
+        public List<AllLeadMasterListDTO> AllGetLeads(LeadFilterDto filter, int currentUserId)
         {
             var parameters = new[]
             {
@@ -315,15 +350,14 @@ namespace LMS.DAL.Repositories
         new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
         new SqlParameter("@Source", filter.Source ?? ""),
         new SqlParameter("@Course", filter.Course ?? ""),
-        new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 },
-        new SqlParameter("@pageSize", filter.PageSize),
-        new SqlParameter("@pageNumber", filter.PageNumber)
+        new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
     };
 
-            var finalList = await context.allLeadMasterListDTO
-                .FromSqlRaw("EXEC dbo.GetLeadsList @userId, @mode, @stage, @startDate, @endDate, @Source, @Course, @assignedTo, @pageSize, @pageNumber", parameters)
-                .ToListAsync();
+            var finalList = context.allLeadMasterListDTO
+                .FromSqlRaw("EXEC dbo.GetLeadsList @userId, @mode, @stage, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
+                .ToList();
 
+            // If projection is needed:
             var mappedResult = finalList.Select(l => new AllLeadMasterListDTO
             {
                 LeadId = l.LeadId,
@@ -334,23 +368,9 @@ namespace LMS.DAL.Repositories
                 InterestedCourse = l.InterestedCourse,
                 IsShowReAsign = l.IsShowReAsign,
                 AssignedUser = l.AssignedUser
-            });
+            }).ToList(); // ✅ convert to List here
 
-            var totalRecords = finalList.Count; // You should ideally fetch total count from DB for real pagination
-            var fromRecord = (filter.PageNumber - 1) * filter.PageSize + 1;
-            var toRecord = fromRecord + finalList.Count - 1;
-
-            var response = new ApiResponse<IEnumerable<AllLeadMasterListDTO>>
-            {
-                Response = mappedResult,
-                Succeded = true,
-                totalRecords = totalRecords,
-                fromRecord = fromRecord,
-                torecord = toRecord,
-                unReadCount = 0 // Replace with actual unread logic if applicable
-            };
-
-            return response;
+            return mappedResult; // ✅ returning List<AllLeadMasterListDTO>
         }
 
 
@@ -368,13 +388,11 @@ namespace LMS.DAL.Repositories
         new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
         new SqlParameter("@Source", filter.Source ?? ""),
         new SqlParameter("@Course", filter.Course ?? ""),
-        new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 },
-        new SqlParameter("@pageSize", filter.PageSize),
-        new SqlParameter("@pageNumber", filter.PageNumber)
+        new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
     };
 
             var leads = await context.leadMasterAssignedListDTO
-                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo, @pageSize, @pageNumber", parameters)
+                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
                 .ToListAsync();
 
             var result = leads.Select(l => new LeadMasterAssignedListDTO
@@ -389,17 +407,11 @@ namespace LMS.DAL.Repositories
                 AssignedUser = l.AssignedUser
             });
 
-            var totalRecords = leads.Count; // Ideally, fetch total count from DB for real pagination
-            var fromRecord = (filter.PageNumber - 1) * filter.PageSize + 1;
-            var toRecord = fromRecord + leads.Count - 1;
 
             var response = new ApiResponse<IEnumerable<LeadMasterAssignedListDTO>>
             {
                 Response = result,
                 Succeded = true,
-                totalRecords = totalRecords,
-                fromRecord = fromRecord,
-                torecord = toRecord,
                 unReadCount = 0 // Replace with actual unread logic if applicable
             };
 
@@ -420,14 +432,12 @@ namespace LMS.DAL.Repositories
     new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
     new SqlParameter("@Source", filter.Source ?? ""),
     new SqlParameter("@Course", filter.Course ?? ""),
-   new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }, // Fetch all leads
-    new SqlParameter("@pageSize", filter.PageSize),
-    new SqlParameter("@pageNumber", filter.PageNumber)
+   new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
       };
 
 
             var leads = await context.leadMasterContactedListDTO
-                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo, @pageSize, @pageNumber", parameters)
+                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
                 .ToListAsync();
 
             var result = leads.Select(l => new LeadMasterContactedListDTO
@@ -442,17 +452,11 @@ namespace LMS.DAL.Repositories
                 IsShowReAsign = l.IsShowReAsign,
                 AssignedUser = l.AssignedUser
             });
-            var totalRecords = leads.Count; // You should ideally fetch total count from DB for real pagination
-            var fromRecord = (filter.PageNumber - 1) * filter.PageSize + 1;
-            var toRecord = fromRecord + leads.Count - 1;
 
             var response = new ApiResponse<IEnumerable<LeadMasterContactedListDTO>>
             {
                 Response = result,
                 Succeded = true,
-                totalRecords = totalRecords,
-                fromRecord = fromRecord,
-                torecord = toRecord,
                 unReadCount = 0 // Replace with actual unread logic if applicable
             };
 
@@ -475,26 +479,18 @@ namespace LMS.DAL.Repositories
     new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
     new SqlParameter("@Source", filter.Source ?? ""),
     new SqlParameter("@Course", filter.Course ?? ""),
-   new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }, // Fetch all leads
-    new SqlParameter("@pageSize", filter.PageSize),
-    new SqlParameter("@pageNumber", filter.PageNumber)
+   new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
 };
 
             var leads = await context.leadMasterQualifiedListDTO
-                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo, @pageSize, @pageNumber", parameters)
+                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
                 .ToListAsync();
 
-            var totalRecords = leads.Count; // You should ideally fetch total count from DB for real pagination
-            var fromRecord = (filter.PageNumber - 1) * filter.PageSize + 1;
-            var toRecord = fromRecord + leads.Count - 1;
 
             var response = new ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>
             {
                 Response = leads,
                 Succeded = true,
-                totalRecords = totalRecords,
-                fromRecord = fromRecord,
-                torecord = toRecord,
                 unReadCount = 0 // Replace with actual unread logic if applicable
             };
 
@@ -515,27 +511,19 @@ namespace LMS.DAL.Repositories
     new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
     new SqlParameter("@Source", filter.Source ?? ""),
     new SqlParameter("@Course", filter.Course ?? ""),
-    new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }, // Fetch all leads
-    new SqlParameter("@pageSize", filter.PageSize),
-    new SqlParameter("@pageNumber", filter.PageNumber)
+    new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
 };
 
             var leads = await context.leadMasterFollowupListDTO
-                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo, @pageSize, @pageNumber", parameters)
+                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
                 .ToListAsync();
 
 
-            var totalRecords = leads.Count; // You should ideally fetch total count from DB for real pagination
-            var fromRecord = (filter.PageNumber - 1) * filter.PageSize + 1;
-            var toRecord = fromRecord + leads.Count - 1;
 
             var response = new ApiResponse<IEnumerable<LeadMasterFollowupListDTO>>
             {
                 Response = leads,
                 Succeded = true,
-                totalRecords = totalRecords,
-                fromRecord = fromRecord,
-                torecord = toRecord,
                 unReadCount = 0 // Replace with actual unread logic if applicable
             };
 
@@ -556,26 +544,17 @@ namespace LMS.DAL.Repositories
     new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
     new SqlParameter("@Source", filter.Source ?? ""),
     new SqlParameter("@Course", filter.Course ?? ""),
-   new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }, // Fetch all leads
-    new SqlParameter("@pageSize", filter.PageSize),
-    new SqlParameter("@pageNumber", filter.PageNumber)
+   new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
 };
 
             var leads = await context.leadMasterCounsellingListDTO
-                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo, @pageSize, @pageNumber", parameters)
+                .FromSqlRaw("EXEC GetLeadsList @userId, @mode, @status, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
                 .ToListAsync();
-            var totalRecords = leads.Count; // You should ideally fetch total count from DB for real pagination
-            var fromRecord = (filter.PageNumber - 1) * filter.PageSize + 1;
-            var toRecord = fromRecord + leads.Count - 1;
-
 
             var response = new ApiResponse<IEnumerable<LeadMasterCounsellingListDTO>>
             {
                 Response = leads,
                 Succeded = true,
-                totalRecords = totalRecords,
-                fromRecord = fromRecord,
-                torecord = toRecord,
                 unReadCount = 0 // Replace with actual unread logic if applicable
             };
 

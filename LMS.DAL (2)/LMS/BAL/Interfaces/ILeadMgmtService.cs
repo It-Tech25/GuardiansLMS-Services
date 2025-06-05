@@ -15,9 +15,10 @@ namespace LMS.BAL.Interfaces
     {
         List<LeadMasterListDTO> GetLeadList(string search = "");
         EditLeadModel GetLeadById(int id);
+        Task<ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>> GetNegotiationList(LeadFilterDto filter);
         GenericResponse AddEditLead(AddLeadModel req, int currentUserId);
-       // Task<IEnumerable<AllLeadMasterListDTO>> AllGetLeads(LeadFilterDto filter, int currentUserId);
-        Task<ApiResponse<IEnumerable<AllLeadMasterListDTO>>> AllGetLeads(LeadFilterDto filter, int currentUserId);
+        // Task<IEnumerable<AllLeadMasterListDTO>> AllGetLeads(LeadFilterDto filter, int currentUserId);
+        List<AllLeadMasterListDTO> AllGetLeads(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>>> GetUnassignedLeadsAsync(LeadFilterDto filter,int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterAssignedListDTO>>> GetAssignedLeadsAsync(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterContactedListDTO>>> GetContactedLeadsAsync(LeadFilterDto filter, int currentUserId);

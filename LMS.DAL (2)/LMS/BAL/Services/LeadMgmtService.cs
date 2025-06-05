@@ -207,7 +207,10 @@ namespace LMS.BAL.Services
         {
             return await lRepo.GetContactedLeads(filter, currentUserId);
         }
-
+       public async Task<ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>> GetNegotiationList(LeadFilterDto filter)
+        {
+            return lRepo.GetNegotiationList(filter);
+        }
         public async Task<ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>> GetQualifiedLeadsAsync(LeadFilterDto filter, int currentUserId)
         {
             return await lRepo.GetQualifiedLeads(filter, currentUserId);
@@ -229,7 +232,7 @@ namespace LMS.BAL.Services
         //    return lRepo.AllGetLeads(filter, currentUserId);
         //} 
 
-        public Task<ApiResponse<IEnumerable<AllLeadMasterListDTO>>> AllGetLeads(LeadFilterDto filter, int currentUserId)
+        public List<AllLeadMasterListDTO> AllGetLeads(LeadFilterDto filter, int currentUserId)
         {
             return lRepo.AllGetLeads(filter, currentUserId);
         }

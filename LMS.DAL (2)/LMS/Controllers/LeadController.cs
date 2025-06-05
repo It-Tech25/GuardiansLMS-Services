@@ -6,6 +6,8 @@ using LMS.Components.ModelClasses.Leads;
 using LMS.Components.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace LMS.Controllers
@@ -68,18 +70,24 @@ namespace LMS.Controllers
          
 
         [HttpGet("GetAllLeads")]
-        public async Task<IActionResult> GetAllLeads([FromQuery] LeadFilterDto filter)
+        public IActionResult GetAllLeads([FromQuery] LeadFilterDto filter, int pagenumber = 1, int pagesize = 10)
         {
             var userId = int.Parse(User.FindFirstValue("UserID"));
 
-            // Adjust the type of 'res' to match the return type of 'AllGetLeads'
-            ApiResponse<IEnumerable<AllLeadMasterListDTO>> res = await lService.AllGetLeads(filter, userId);
+            // Assuming your service now returns a List<AllLeadMasterListDTO>
+            var list = lService.AllGetLeads(filter, userId);
 
-            // Assuming ConvertResultToApiResonse processes the response appropriately
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            res.Succeded = true;
+            var filtered = list.AsQueryable();
 
-            return Ok(res);
+            var skip = (pagenumber - 1) * pagesize;
+            var paged = filtered.Skip(skip).Take(pagesize).ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = filtered.Count(),
+                data = paged
+            });
         }
 
         [HttpGet("GetAllClossedLeads")]
@@ -113,87 +121,247 @@ namespace LMS.Controllers
 
 
         [HttpGet("UnassignedLeads")]
-        public async Task<IActionResult> GetUnassignedLeads([FromQuery] LeadFilterDto filter)
+        public async Task<IActionResult> GetUnassignedLeads([FromQuery] LeadFilterDto filter, int pagenumber = 1, int pagesize = 10)
         {
             var userId = int.Parse(User.FindFirstValue("UserID"));
 
-             ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>> res = await lService.GetUnassignedLeadsAsync(filter, userId);
+            ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>> res = await lService.GetUnassignedLeadsAsync(filter, userId);
 
-             var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            res.Succeded = true;
+            if (res?.Response == null)
+            {
+                return Ok(new
+                {
+                    succeeded = false,
+                    message = "No data found",
+                    totalRecords = 0,
+                    data = new List<LeadMasterUnAssignedListDTO>()
+                });
+            }
 
-            return Ok(res);
+            var data = res.Response.ToList(); 
+            var totalRecords = data.Count;
+
+            var pagedData = data
+                .Skip((pagenumber - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = totalRecords,
+                data = pagedData
+            });
         }
 
 
 
 
         [HttpGet("AssignedLeads")]
-        public async Task<IActionResult> GetAssignedLeads([FromQuery] LeadFilterDto filter)
+        public async Task<IActionResult> GetAssignedLeads([FromQuery] LeadFilterDto filter, int pagenumber = 1, int pagesize = 10)
         {
             var userId = int.Parse(User.FindFirstValue("UserID"));
 
             ApiResponse<IEnumerable<LeadMasterAssignedListDTO>> res = await lService.GetAssignedLeadsAsync(filter, userId);
 
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            res.Succeded = true;
+            if (res?.Response == null || !res.Response.Any())
+            {
+                return Ok(new
+                {
+                    succeeded = false,
+                    message = "No data found",
+                    totalRecords = 0,
+                    data = new List<LeadMasterAssignedListDTO>()
+                });
+            }
 
-            return Ok(res);
+            var data = res.Response.ToList();
+            var totalRecords = data.Count;
+
+            var pagedData = data
+                .Skip((pagenumber - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = totalRecords,
+                data = pagedData
+            });
         }
 
         [HttpGet("ContactedLeads")]
-        public async Task<IActionResult> GetContactedLeads([FromQuery] LeadFilterDto filter)
+        public async Task<IActionResult> GetContactedLeads([FromQuery] LeadFilterDto filter, int pagenumber = 1, int pagesize = 10)
         {
             var userId = int.Parse(User.FindFirstValue("UserID"));
+
             ApiResponse<IEnumerable<LeadMasterContactedListDTO>> res = await lService.GetContactedLeadsAsync(filter, userId);
 
-            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            res.Succeded = true;
+            if (res?.Response == null || !res.Response.Any())
+            {
+                return Ok(new
+                {
+                    succeeded = false,
+                    message = "No data found",
+                    totalRecords = 0,
+                    data = new List<LeadMasterContactedListDTO>()
+                });
+            }
 
-            return Ok(res);
- 
+            var data = res.Response.ToList();
+            var totalRecords = data.Count;
+
+            var pagedData = data
+                .Skip((pagenumber - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = totalRecords,
+                data = pagedData
+            });
         }
 
         [HttpGet("QualifiedLeads")]
-        public async Task<IActionResult> GetQualifiedLeads([FromQuery] LeadFilterDto filter)
+        public async Task<IActionResult> GetQualifiedLeads([FromQuery] LeadFilterDto filter, int pagenumber = 1, int pagesize = 10)
         {
-             var userId = int.Parse(User.FindFirstValue("UserID"));
+            var userId = int.Parse(User.FindFirstValue("UserID"));
             ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>> res = await lService.GetQualifiedLeadsAsync(filter, userId);
 
-            // var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            res.Succeded = true;
+            if (res?.Response == null || !res.Response.Any())
+            {
+                return Ok(new
+                {
+                    succeeded = false,
+                    message = "No data found",
+                    totalRecords = 0,
+                    data = new List<LeadMasterQualifiedListDTO>()
+                });
+            }
 
-            return Ok(res);
+            var data = res.Response.ToList();
+            var totalRecords = data.Count;
 
- 
+            var pagedData = data
+                .Skip((pagenumber - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = totalRecords,
+                data = pagedData
+            });
         }
 
+
         [HttpGet("FollowUpLeads")]
-        public async Task<IActionResult> GetFollowUpLeads([FromQuery] LeadFilterDto filter)
+        public async Task<IActionResult> GetFollowUpLeads([FromQuery] LeadFilterDto filter, int pagenumber = 1, int pagesize = 10)
         {
             var userId = int.Parse(User.FindFirstValue("UserID"));
             ApiResponse<IEnumerable<LeadMasterFollowupListDTO>> res = await lService.GetFollowUpLeadsAsync(filter, userId);
 
-            //var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            res.Succeded = true;
+            if (res?.Response == null || !res.Response.Any())
+            {
+                return Ok(new
+                {
+                    succeeded = false,
+                    message = "No data found",
+                    totalRecords = 0,
+                    data = new List<LeadMasterFollowupListDTO>()
+                });
+            }
 
-            return Ok(res);
- 
+            var data = res.Response.ToList();
+            var totalRecords = data.Count;
+
+            var pagedData = data
+                .Skip((pagenumber - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = totalRecords,
+                data = pagedData
+            });
         }
 
         [HttpGet("CounsellingDoneLeads")]
-        public async Task<IActionResult> GetCounsellingDoneLeads([FromQuery] LeadFilterDto filter)
+        public async Task<IActionResult> GetCounsellingDoneLeads([FromQuery] LeadFilterDto filter, int pagenumber = 1, int pagesize = 10)
         {
             var userId = int.Parse(User.FindFirstValue("UserID"));
 
             ApiResponse<IEnumerable<LeadMasterCounsellingListDTO>> res = await lService.GetCounsellingDoneLeadsAsync(filter, userId);
 
-            //var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
-            res.Succeded = true;
+            if (res?.Response == null || !res.Response.Any())
+            {
+                return Ok(new
+                {
+                    succeeded = false,
+                    message = "No data found",
+                    totalRecords = 0,
+                    data = new List<LeadMasterCounsellingListDTO>()
+                });
+            }
 
-            return Ok(res);
-             
+            var data = res.Response.ToList();
+            var totalRecords = data.Count;
+
+            var pagedData = data
+                .Skip((pagenumber - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = totalRecords,
+                data = pagedData
+            });
         }
+
+        [HttpGet("NegotiationLeads")]
+
+        public async Task<IActionResult> GetNegotiationLeads([FromQuery] LeadFilterDto filter, int pagenumber = 1, int pagesize = 10)
+        {
+            var userId = int.Parse(User.FindFirstValue("UserID"));
+
+            var res = await lService.GetNegotiationList(filter); 
+
+            if (res?.Response == null || !res.Response.Any())
+            {
+                return Ok(new
+                {
+                    succeeded = false,
+                    message = "No data found",
+                    totalRecords = 0,
+                    data = new List<LeadMasterQualifiedListDTO>()
+                });
+            }
+
+            var data = res.Response.ToList();
+            var totalRecords = data.Count;
+
+            var pagedData = data
+                .Skip((pagenumber - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = totalRecords,
+                data = pagedData
+            });
+        }
+
+
 
         [HttpPost("UpdateAssignedUser")]
         public IActionResult UpdateAssignedUser([FromBody] UpdateLeadStatusDto dto)
