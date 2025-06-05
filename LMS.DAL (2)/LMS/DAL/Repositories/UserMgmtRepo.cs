@@ -197,6 +197,22 @@ namespace LMS.DAL.Repositories
             catch (Exception ex) { }
             return response;
         }
+        public List<StatusDD> GetStatusDropDown()
+        {
+            List<StatusDD> response = new List<StatusDD>();
+            try
+            {
+                response = (from m in context.commonStatuses
+                            where m.IsDeleted == false 
+                            select new StatusDD
+                            {
+                                Id = m.StatusId,
+                                Status = m.StatusName
+                            }).ToList();
+            }
+            catch (Exception ex) { }
+            return response;
+        }
 
         public List<UsertDTO> GetUserTypDD()
         {

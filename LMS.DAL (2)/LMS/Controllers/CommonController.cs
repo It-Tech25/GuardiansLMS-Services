@@ -1,4 +1,5 @@
 ﻿using LMS.BAL.Interfaces;
+using LMS.Components.ModelClasses.Common;
 using LMS.Components.ModelClasses.CourseType;
 using LMS.Components.ModelClasses.Instructor;
 using LMS.Components.ModelClasses.Student;
@@ -79,6 +80,18 @@ namespace LMS.Controllers
         {
             List<UsersDTO> res = new List<UsersDTO>();
             res = uService.GetSalesDD();
+
+            var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
+            finalResponse.Succeded = true;
+            finalResponse.totalRecords = res.Count();
+
+            return Ok(finalResponse);
+        }
+        [HttpGet("GetStatusDropDown")]
+        public async Task<IActionResult> GetStatusDD()
+        {
+            List<StatusDD> res = new List<StatusDD>();
+            res = uService.GetStatusDropDown();
 
             var finalResponse = ConvertToAPI.ConvertResultToApiResonse(res);
             finalResponse.Succeded = true;

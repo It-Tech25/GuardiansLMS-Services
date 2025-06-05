@@ -24,7 +24,7 @@ namespace LMS.BAL.Interfaces
         Task<ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>> GetQualifiedLeadsAsync(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterFollowupListDTO>>> GetFollowUpLeadsAsync(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterCounsellingListDTO>>> GetCounsellingDoneLeadsAsync(LeadFilterDto filter, int currentUserId);
-
+        List<LeadMasterListDTO> GetClossedList(string search = "");
         GenericResponse AddLeadNote(AddLeadNoteDto noteDto);
         GenericResponse UpdateAssignedUser(UpdateLeadStatusDto dto, int uuserId);
         Task<ApiResponse<object>> GetNextStatusesAsync(string currentStatus);

@@ -189,7 +189,10 @@ namespace LMS.BAL.Services
         {
             return lRepo.UpdateLeadAsync(lead);
         }
-
+      public  List<LeadMasterListDTO> GetClossedList(string search = "")
+        {
+            return lRepo.GetClossedList(search);
+        }
         public async Task<ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>>> GetUnassignedLeadsAsync(LeadFilterDto filter, int currentUserId)
         {
             return await lRepo.GetUnassignedLeads(filter, currentUserId);

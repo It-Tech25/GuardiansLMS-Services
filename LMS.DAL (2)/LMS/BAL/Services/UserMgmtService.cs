@@ -119,7 +119,10 @@ namespace LMS.BAL.Services
             return uRepo.GetSalesDD();
         }
 
-
+       public List<StatusDD> GetStatusDropDown()
+        {
+            return uRepo.GetStatusDropDown();
+        }
         public GenericResponse DeleteUser(int id, int currentUserId)
         {
             GenericResponse res = new GenericResponse();

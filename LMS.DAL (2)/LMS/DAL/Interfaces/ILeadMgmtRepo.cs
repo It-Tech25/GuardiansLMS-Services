@@ -28,7 +28,7 @@ namespace LMS.DAL.Interfaces
         Task<ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>> GetQualifiedLeads(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterFollowupListDTO>>> GetFollowUpLeads(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterCounsellingListDTO>>> GetCounsellingDoneLeads(LeadFilterDto filter, int currentUserId);
-
+        List<LeadMasterListDTO> GetClossedList(string search = "");
         GenericResponse AddLeadNote(AddLeadNoteDto noteDto);
         GenericResponse UpdateAssignedUser(UpdateLeadStatusDto dto, int uuserId);
 

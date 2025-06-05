@@ -82,6 +82,34 @@ namespace LMS.Controllers
             return Ok(res);
         }
 
+        [HttpGet("GetAllClossedLeads")]
+        public IActionResult GetAllClossedLeads(string searchterm = "", int pagenumber = 1, int pagesize = 10)
+        {
+            var list = lService.GetClossedList(searchterm ?? "");
+
+            var filtered = list.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchterm))
+            {
+                var term = searchterm.Trim().ToLower();
+                filtered = filtered.Where(x =>
+                    (!string.IsNullOrEmpty(x.Name) && x.Name.ToLower().Contains(term)) ||
+                    (!string.IsNullOrEmpty(x.Email) && x.Email.ToLower().Contains(term)) ||
+                    (!string.IsNullOrEmpty(x.MobileNumber) && x.MobileNumber.ToLower().Contains(term))
+                );
+            }
+
+            var skip = (pagenumber - 1) * pagesize;
+            var paged = filtered.Skip(skip).Take(pagesize).ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = filtered.Count(),
+                data = paged
+            });
+        }
+
 
 
         [HttpGet("UnassignedLeads")]

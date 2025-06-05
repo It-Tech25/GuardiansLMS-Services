@@ -12,6 +12,7 @@ namespace LMS.BAL.Interfaces
 		Task<LoginResponse> getUserTokenbyId(int id);
 		Task<(int, string)> updateRefreshToken(string refreshToken, long userId, DateTime refTokenexpDate);
         List<UsersDTO> GetSalesDD();
+        List<StatusDD> GetStatusDropDown();
 
 
         #region User Mgmt
