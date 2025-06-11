@@ -19,7 +19,7 @@ namespace LMS.DAL.Repositories
             context = _context;
         }
 
-        public GenericResponse AddFee(FeeCollectionDto dto)
+        public GenericResponse AddFee(FeeCollectionDto dto, int Userid)
         {
             var res = new GenericResponse();
             try
@@ -30,10 +30,12 @@ namespace LMS.DAL.Repositories
                     Amount = dto.Amount,
                     PaymentDate = dto.PaymentDate,
                     PaymentMode = dto.PaymentMode,
+                    Reciept=dto.ReceiptUrl,
                     Remarks = dto.Remarks,
-                    CreatedBy = dto.CreatedBy,
+                    CreatedBy =Userid,
                     CreatedOn = DateTime.UtcNow,
-                    IsDeleted = false
+                    IsDeleted = false,
+                   
                 };
 
                 context.FeeCollections.Add(fee);
@@ -67,6 +69,7 @@ namespace LMS.DAL.Repositories
                 fee.Amount = dto.Amount;
                 fee.PaymentDate = dto.PaymentDate;
                 fee.PaymentMode = dto.PaymentMode;
+                fee.Reciept = dto.ReceiptUrl;
                 fee.Remarks = dto.Remarks;
                 fee.ModifiedBy = userId;
                 fee.ModifiedOn = DateTime.UtcNow;
@@ -129,7 +132,8 @@ namespace LMS.DAL.Repositories
                               Amount = f.Amount,
                               PaymentDate = f.PaymentDate,
                               PaymentMode = f.PaymentMode,
-                              Remarks = f.Remarks
+                               ReceiptUrl=f.Reciept,
+                               Remarks = f.Remarks
                           }).ToList();
             return result;
         }
@@ -148,6 +152,7 @@ namespace LMS.DAL.Repositories
                               Amount = f.Amount,
                               PaymentDate = f.PaymentDate,
                               PaymentMode = f.PaymentMode,
+                              ReceiptUrl = f.Reciept,
                               Remarks = f.Remarks
                           }).FirstOrDefault();
             return result;

@@ -61,12 +61,12 @@ namespace LMS.DAL.Repositories
             List<LeadMasterListDTO> response = new List<LeadMasterListDTO>();
             try
             {
-                StatusTypes leadstatus = context.statusTypes.Where(l => l.TypeName == "Clossed" && l.IsDeleted == false).FirstOrDefault();
+                CommonStatus leadstatus = context.commonStatuses.Where(l => l.StatusName == "Clossed" && l.IsDeleted == false).FirstOrDefault();
                 response = (from l in context.leads
                             join s in context.commonStatuses on l.StatusId equals s.StatusId
                             //join c in context.courseTypes on l.IntrestedCourse equals c.CourseId
                             join u in context.userEntities on l.AssignedUserId equals u.UserId
-                            where l.IsDeleted == false && l.Name.Contains(search) && s.StatusTypeId == leadstatus.TypeId
+                            where l.IsDeleted == false && l.Name.Contains(search) && s.StatusTypeId == leadstatus.StatusTypeId
                             select new LeadMasterListDTO
                             {
                                 LeadId = l.LeadId,
@@ -300,7 +300,34 @@ namespace LMS.DAL.Repositories
             return response;
         }
 
-         
+        public GenericResponse UpdateLeadNote(AddLeadNoteDto noteDto)
+        {
+            GenericResponse response = new GenericResponse();
+            try
+            {
+                var res = context.leadNoteEntity.Where(a => a.LeadId == noteDto.LeadId).FirstOrDefault();
+
+                res.LeadId = noteDto.LeadId;
+                res.NoteText = noteDto.NoteText;
+                res.CreatedOn = DateTime.UtcNow;
+              
+
+                context.leadNoteEntity.Update(res);
+                context.SaveChanges();
+
+                response.statusCode = 200;
+                response.Message = "Note Updated successfully";
+                response.CurrentId = res.LeadId;
+            }
+            catch (Exception ex)
+            {
+                response.statusCode = 500;
+                response.Message = $"Error: {ex.Message}";
+            }
+            return response;
+        }
+
+
         public async Task<ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>>> GetUnassignedLeads(LeadFilterDto filter, int currentUserId)
         {
             var parameters = new[]

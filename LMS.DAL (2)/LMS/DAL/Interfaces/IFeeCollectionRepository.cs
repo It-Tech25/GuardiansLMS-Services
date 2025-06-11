@@ -10,7 +10,7 @@ namespace LMS.DAL.Interfaces
 {
     public interface IFeeCollectionRepository
     {
-        GenericResponse AddFee(FeeCollectionDto dto);
+        GenericResponse AddFee(FeeCollectionDto dto,int Userid);
         GenericResponse UpdateFee(FeeCollectionDto dto, int userId);
         GenericResponse DeleteFee(int feeId, int userId);
         IEnumerable<FeeCollectionsDto> GetAllFees();

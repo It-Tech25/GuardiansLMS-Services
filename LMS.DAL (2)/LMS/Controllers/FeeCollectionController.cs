@@ -20,14 +20,51 @@ namespace LMS.Controllers
         [HttpPost("Add")]
         public IActionResult AddFee(FeeCollectionDto dto)
         {
-            var response = repo.AddFee(dto);
+            int userId = int.Parse(User.FindFirstValue("UserID"));
+            if (dto.Receipt != null && dto.Receipt.Length > 0)
+            {
+                var receiptFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "receipts");
+                if (!Directory.Exists(receiptFolder))
+                {
+                    Directory.CreateDirectory(receiptFolder);
+                }
+
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.Receipt.FileName);
+                var filePath = Path.Combine(receiptFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    dto.Receipt.CopyToAsync(stream);
+                }
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                dto.ReceiptUrl = $"{baseUrl}/receipts/{fileName}";
+            }
+
+            var response = repo.AddFee(dto,userId);
             return Ok(response);
         }
-
-        [HttpPut("Update")]
+            [HttpPut("Update")]
         public IActionResult UpdateFee(FeeCollectionDto dto)
         {
             int userId = int.Parse(User.FindFirstValue("UserID"));
+            if (dto.Receipt != null && dto.Receipt.Length > 0)
+            {
+                var receiptFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "receipts");
+                if (!Directory.Exists(receiptFolder))
+                {
+                    Directory.CreateDirectory(receiptFolder);
+                }
+
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.Receipt.FileName);
+                var filePath = Path.Combine(receiptFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    dto.Receipt.CopyToAsync(stream);
+                }
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                dto.ReceiptUrl = $"{baseUrl}/receipts/{fileName}";
+            }
             var response = repo.UpdateFee(dto, userId);
             return Ok(response);
         }

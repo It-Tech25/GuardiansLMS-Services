@@ -7,6 +7,7 @@ using LMS.DAL.Repositories;
 using LMS.Models.ModelClasses;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Security.Claims;
 
 namespace LMS.Controllers
 {
@@ -26,6 +27,8 @@ namespace LMS.Controllers
         [HttpPost("Add")]
         public IActionResult AddInstructor([FromBody] InstructorDto dto)
         {
+            int userId = int.Parse(User.FindFirstValue("UserID"));
+            dto.CreatedBy = userId;
             var res = _repo.AddInstructor(dto);
             return Ok(res);
         }
@@ -33,6 +36,8 @@ namespace LMS.Controllers
         [HttpPut("Edit")]
         public IActionResult EditInstructor([FromBody] InstructorDto dto)
         {
+            int userId = int.Parse(User.FindFirstValue("UserID"));
+            dto.CreatedBy = userId;
             var res = _repo.UpdateInstructor(dto);
             return Ok(res);
         }

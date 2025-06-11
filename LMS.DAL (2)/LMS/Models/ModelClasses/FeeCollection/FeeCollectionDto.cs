@@ -15,6 +15,9 @@ namespace LMS.Components.ModelClasses.FeeCollection
         public string PaymentMode { get; set; }
         public string Remarks { get; set; }
         public int CreatedBy { get; set; }
+
+        public IFormFile? Receipt { get; set; }
+        public String? ReceiptUrl { get; set; }
     }
     public class FeeCollectionsDto
     {
@@ -24,6 +27,7 @@ namespace LMS.Components.ModelClasses.FeeCollection
         public string PaymentMode { get; set; }
         public string Remarks { get; set; }
         public string StudentName { get; set; }
+        public String? ReceiptUrl { get; set; }
         public int uid { get; set; }
     }
 

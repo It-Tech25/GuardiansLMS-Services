@@ -30,6 +30,7 @@ namespace LMS.DAL.Interfaces
         Task<ApiResponse<IEnumerable<LeadMasterCounsellingListDTO>>> GetCounsellingDoneLeads(LeadFilterDto filter, int currentUserId);
         List<LeadMasterListDTO> GetClossedList(string search = "");
         GenericResponse AddLeadNote(AddLeadNoteDto noteDto);
+        GenericResponse UpdateLeadNote(AddLeadNoteDto noteDto);
         GenericResponse UpdateAssignedUser(UpdateLeadStatusDto dto, int uuserId);
         ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>> GetNegotiationList(LeadFilterDto filter);
         Task<ApiResponse<object>> GetNextStatusesAsync(string currentStatus);
