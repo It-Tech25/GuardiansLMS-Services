@@ -37,6 +37,7 @@ namespace LMS.Components.ModelClasses.Leads
         public string? IntrestedCourse { get; set; }
         public int? AssignedUser { get; set; }
         public int? StatusId { get; set; }
+        public string? Note { get; set; }
     }
 
     public class LeadMasterUnAssignedListDTO

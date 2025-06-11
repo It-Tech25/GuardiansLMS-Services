@@ -89,8 +89,8 @@ namespace LMS.DAL.Repositories
             var response = new ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>();
             try
             {
-                var leadstatus = context.statusTypes
-                    .FirstOrDefault(l => l.TypeName == "Negotiation" && l.IsDeleted == false);
+                var leadstatus = context.commonStatuses
+                    .FirstOrDefault(l => l.StatusName == "Negotiation" && l.IsDeleted == false);
 
                 if (leadstatus == null)
                 {
@@ -99,24 +99,27 @@ namespace LMS.DAL.Repositories
                     return response;
                 }
 
-                var data = (from l in context.leads
-                            join s in context.commonStatuses on l.StatusId equals s.StatusId
-                            join u in context.userEntities on l.AssignedUserId equals u.UserId
-                            where l.IsDeleted == false
-                                  && s.StatusTypeId == leadstatus.TypeId
-                            select new LeadMasterQualifiedListDTO
-                            {
-                                LeadId = l.LeadId,
-                                FromSource = l.FromSource,
-                                MobileNumber = l.MobileNumber,
-                                Email = l.Email,
-                                Name = l.Name,
-                                InterestedCourse = l.InterestedCourse,
-                                AssignedUser = u.UserName
-                            }).ToList();
+                if (leadstatus != null)
+                {
+                    var data = (from l in context.leads
+                                join s in context.commonStatuses on l.StatusId equals s.StatusId
+                                join u in context.userEntities on l.AssignedUserId equals u.UserId
+                                where l.IsDeleted == false && l.StatusId == leadstatus.StatusId
+                                select new LeadMasterQualifiedListDTO
+                                {
+                                    LeadId = l.LeadId,
+                                    FromSource = l.FromSource,
+                                    MobileNumber = l.MobileNumber,
+                                    Email = l.Email,
+                                    Name = l.Name,
+                                    InterestedCourse = l.InterestedCourse,
+                                    AssignedUser = u.UserName
+                                }).ToList();
+                    response.Succeded = true;
+                    response.Response = data;
+                }
 
-                response.Succeded = true;
-                response.Response = data;
+             
             }
             catch (Exception ex)
             {
@@ -144,7 +147,8 @@ namespace LMS.DAL.Repositories
                                 Name = l.Name,
                                 IntrestedCourse = l.InterestedCourse,
                                 AssignedUser = l.AssignedUserId,
-                                StatusId = l.StatusId
+                                StatusId = l.StatusId,
+                                Note=context.leadNoteEntity.Where(a=>a.LeadId==l.LeadId && l.IsDeleted==false).Select(a=>a.NoteText).FirstOrDefault()
                             }).FirstOrDefault();
             }
             catch (Exception ex) { }
