@@ -272,25 +272,34 @@ namespace LMS.DAL.Repositories
 
 
 
-        public GenericResponse AddLeadNote(AddLeadNoteDto noteDto)
+        public GenericResponse AddLeadNote(AddLeadNoteDto noteDto, int Userid)
         {
             GenericResponse response = new GenericResponse();
             try
             {
-                var note = new LeadNoteEntity
+                int count = context.leadNoteEntity.Where(a => a.LeadId == noteDto.LeadId).Count();
+                if (count == 0)
                 {
-                    LeadId = noteDto.LeadId,
-                    NoteText = noteDto.NoteText,
-                  //  CreatedBy = noteDto.CreatedBy,
-                    CreatedOn = DateTime.UtcNow
-                };
+                    var note = new LeadNoteEntity
+                    {
+                        LeadId = noteDto.LeadId,
+                        NoteText = noteDto.NoteText,
+                        CreatedBy = Userid,
+                        CreatedOn = DateTime.UtcNow
+                    };
 
-                context.leadNoteEntity.Add(note);
-                context.SaveChanges();
+                    context.leadNoteEntity.Add(note);
+                    context.SaveChanges();
 
-                response.statusCode = 200;
-                response.Message = "Note added successfully";
-                response.CurrentId = note.LeadId; 
+                    response.statusCode = 200;
+                    response.Message = "Note added successfully";
+                    response.CurrentId = note.LeadId;
+                }
+                else
+                {
+                    response.statusCode = 200;
+                    response.Message = "Alredy Note added By This Lead";
+                }
             }
             catch (Exception ex)
             {

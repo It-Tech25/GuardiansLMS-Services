@@ -380,8 +380,8 @@ namespace LMS.Controllers
         public IActionResult AddLeadNote([FromBody] AddLeadNoteDto noteDto)
         {
             var userId = int.Parse(User.FindFirstValue("UserID"));
-
-            var result = lService.AddLeadNote(noteDto);
+           
+            var result = lService.AddLeadNote(noteDto,userId);
 
             if (result.statusCode == 200)
                 return Ok(result);

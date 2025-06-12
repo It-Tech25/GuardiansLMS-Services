@@ -165,9 +165,9 @@ namespace LMS.BAL.Services
         
        
 
-        public GenericResponse AddLeadNote(AddLeadNoteDto noteDto)
+        public GenericResponse AddLeadNote(AddLeadNoteDto noteDto,int Userid)
         {
-            return  lRepo.AddLeadNote(noteDto);
+            return  lRepo.AddLeadNote(noteDto,Userid);
         }
        public GenericResponse UpdateLeadNote(AddLeadNoteDto noteDto)
         {
