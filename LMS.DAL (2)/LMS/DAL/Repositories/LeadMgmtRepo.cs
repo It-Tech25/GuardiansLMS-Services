@@ -66,7 +66,7 @@ namespace LMS.DAL.Repositories
                             join s in context.commonStatuses on l.StatusId equals s.StatusId
                             //join c in context.courseTypes on l.IntrestedCourse equals c.CourseId
                             join u in context.userEntities on l.AssignedUserId equals u.UserId
-                            where l.IsDeleted == false && l.Name.Contains(search) && s.StatusTypeId == leadstatus.StatusTypeId
+                            where l.IsDeleted == false && l.Name.Contains(search) && s.StatusTypeId == leadstatus.StatusTypeId && l.StatusId==20
                             select new LeadMasterListDTO
                             {
                                 LeadId = l.LeadId,
