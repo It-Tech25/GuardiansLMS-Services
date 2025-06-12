@@ -13,7 +13,7 @@ namespace LMS.Components.ModelClasses.FeeCollection
         public decimal Amount { get; set; }
         public DateTime PaymentDate { get; set; }
         public string PaymentMode { get; set; }
-        public string Remarks { get; set; }
+        public string? Remarks { get; set; }
         public int CreatedBy { get; set; }
 
         public IFormFile? Receipt { get; set; }

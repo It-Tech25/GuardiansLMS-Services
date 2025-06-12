@@ -15,7 +15,7 @@ namespace LMS.Components.Entities
     public decimal Amount { get; set; }
     public DateTime PaymentDate { get; set; }
     public string PaymentMode { get; set; }
-    public string Remarks { get; set; }
+    public string? Remarks { get; set; }
     public int CreatedBy { get; set; }
     public DateTime CreatedOn { get; set; }
         public string? Reciept {  get; set; }
