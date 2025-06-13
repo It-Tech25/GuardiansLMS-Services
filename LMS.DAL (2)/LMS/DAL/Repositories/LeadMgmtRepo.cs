@@ -66,7 +66,7 @@ namespace LMS.DAL.Repositories
                             join s in context.commonStatuses on l.StatusId equals s.StatusId
                             //join c in context.courseTypes on l.IntrestedCourse equals c.CourseId
                             join u in context.userEntities on l.AssignedUserId equals u.UserId
-                            where l.IsDeleted == false && l.Name.Contains(search) && s.StatusTypeId == leadstatus.StatusTypeId && l.StatusId==20
+                            where l.IsDeleted == false && l.Name.Contains(search) && s.StatusTypeId == leadstatus.StatusTypeId && l.StatusId == 20
                             select new LeadMasterListDTO
                             {
                                 LeadId = l.LeadId,
@@ -119,7 +119,7 @@ namespace LMS.DAL.Repositories
                     response.Response = data;
                 }
 
-             
+
             }
             catch (Exception ex)
             {
@@ -148,7 +148,7 @@ namespace LMS.DAL.Repositories
                                 IntrestedCourse = l.InterestedCourse,
                                 AssignedUser = l.AssignedUserId,
                                 StatusId = l.StatusId,
-                                Note=context.leadNoteEntity.Where(a=>a.LeadId==l.LeadId && l.IsDeleted==false).Select(a=>a.NoteText).FirstOrDefault()
+                                Note = context.leadNoteEntity.Where(a => a.LeadId == l.LeadId && l.IsDeleted == false).Select(a => a.NoteText).FirstOrDefault()
                             }).FirstOrDefault();
             }
             catch (Exception ex) { }
@@ -319,7 +319,7 @@ namespace LMS.DAL.Repositories
                 res.LeadId = noteDto.LeadId;
                 res.NoteText = noteDto.NoteText;
                 res.CreatedOn = DateTime.UtcNow;
-              
+
 
                 context.leadNoteEntity.Update(res);
                 context.SaveChanges();
@@ -381,23 +381,38 @@ namespace LMS.DAL.Repositories
 
         public List<AllLeadMasterListDTO> AllGetLeads(LeadFilterDto filter, int currentUserId)
         {
-            var parameters = new[]
-            {
-        new SqlParameter("@userId", currentUserId),
-        new SqlParameter("@mode", "All"),
-        new SqlParameter("@stage", ""),
-        new SqlParameter("@startDate", filter.StartDate ?? (object)DBNull.Value),
-        new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
-        new SqlParameter("@Source", filter.Source ?? ""),
-        new SqlParameter("@Course", filter.Course ?? ""),
-        new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
-    };
+            //        var parameters = new[]
+            //        {
+            //    new SqlParameter("@userId", currentUserId),
+            //    new SqlParameter("@mode", "All"),
+            //    new SqlParameter("@stage", ""),
+            //    new SqlParameter("@startDate", filter.StartDate ?? (object)DBNull.Value),
+            //    new SqlParameter("@endDate", filter.EndDate ?? (object)DBNull.Value),
+            //    new SqlParameter("@Source", filter.Source ?? ""),
+            //    new SqlParameter("@Course", filter.Course ?? ""),
+            //    new SqlParameter("@assignedTo", SqlDbType.Int) { Value = 0 }
+            //};
 
-            var finalList = context.allLeadMasterListDTO
-                .FromSqlRaw("EXEC dbo.GetLeadsList @userId, @mode, @stage, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
-                .ToList();
+            //        var finalList = context.allLeadMasterListDTO
+            //            .FromSqlRaw("EXEC dbo.GetLeadsList @userId, @mode, @stage, @startDate, @endDate, @Source, @Course, @assignedTo", parameters)
+            //            .ToList();
 
-            // If projection is needed:
+            //        // If projection is needed:
+            //        var mappedResult = finalList.Select(l => new AllLeadMasterListDTO
+            //        {
+            //            LeadId = l.LeadId,
+            //            FromSource = l.FromSource,
+            //            MobileNumber = l.MobileNumber,
+            //            Email = l.Email,
+            //            Name = l.Name,
+            //            InterestedCourse = l.InterestedCourse,
+            //            IsShowReAsign = l.IsShowReAsign,
+            //            AssignedUser = l.AssignedUser
+            //        }).ToList(); // ✅ convert to List here
+
+            //        return mappedResult; // ✅ returning List<AllLeadMasterListDTO>
+
+            var finalList = context.leads.Where(a => a.IsDeleted == false).ToList();
             var mappedResult = finalList.Select(l => new AllLeadMasterListDTO
             {
                 LeadId = l.LeadId,
@@ -406,11 +421,11 @@ namespace LMS.DAL.Repositories
                 Email = l.Email,
                 Name = l.Name,
                 InterestedCourse = l.InterestedCourse,
-                IsShowReAsign = l.IsShowReAsign,
-                AssignedUser = l.AssignedUser
+                AssignedUser =context.userEntities.Where(a=>a.UserId==l.AssignedUserId).Select(a=>a.UserName).FirstOrDefault()
             }).ToList(); // ✅ convert to List here
 
-            return mappedResult; // ✅ returning List<AllLeadMasterListDTO>
+            return mappedResult;
+
         }
 
 
@@ -461,7 +476,7 @@ namespace LMS.DAL.Repositories
 
 
 
-        public async  Task<ApiResponse<IEnumerable<LeadMasterContactedListDTO>>> GetContactedLeads(LeadFilterDto filter, int currentUserId)
+        public async Task<ApiResponse<IEnumerable<LeadMasterContactedListDTO>>> GetContactedLeads(LeadFilterDto filter, int currentUserId)
         {
             var parameters = new[]
             {
@@ -503,10 +518,10 @@ namespace LMS.DAL.Repositories
 
 
             return response;
-             
-             
+
+
         }
-        
+
 
         public async Task<ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>> GetQualifiedLeads(LeadFilterDto filter, int currentUserId)
         {
@@ -539,7 +554,7 @@ namespace LMS.DAL.Repositories
             return response;
         }
 
-       
+
         public async Task<ApiResponse<IEnumerable<LeadMasterFollowupListDTO>>> GetFollowUpLeads(LeadFilterDto filter, int currentUserId)
         {
             var parameters = new[]
@@ -571,7 +586,7 @@ namespace LMS.DAL.Repositories
 
             return response;
         }
-       
+
 
         public async Task<ApiResponse<IEnumerable<LeadMasterCounsellingListDTO>>> GetCounsellingDoneLeads(LeadFilterDto filter, int currentUserId)
         {
@@ -606,38 +621,38 @@ namespace LMS.DAL.Repositories
 
 
 
-    //    private static readonly Dictionary<string, List<string>> StatusTransitions = new Dictionary<string, List<string>>
-    //{
-    //    { "UnAssigned", new List<string> { "Assigned","Contacted", "Follow-up", "Counselling Done", "Negotiation" } },
-    //    { "Assigned", new List<string> { "Contacted", "Follow-up", "Counselling Done", "Negotiation" } },
-    //    { "Contacted", new List<string> { "Qualified", "Follow-up", "Counselling Done", "Negotiation" } },
-    //    { "Qualified", new List<string> { "Follow-up", "Counselling Done", "Negotiation" } },
-    //    { "Follow-up", new List<string> { "Counselling Done", "Negotiation" } },
-    //    { "Counselling Done", new List<string> { "Negotiation" } },
-    //    { "Negotiation", new List<string> { "Closed" } }
-    //    // Add other transitions as needed
-    //};
+        //    private static readonly Dictionary<string, List<string>> StatusTransitions = new Dictionary<string, List<string>>
+        //{
+        //    { "UnAssigned", new List<string> { "Assigned","Contacted", "Follow-up", "Counselling Done", "Negotiation" } },
+        //    { "Assigned", new List<string> { "Contacted", "Follow-up", "Counselling Done", "Negotiation" } },
+        //    { "Contacted", new List<string> { "Qualified", "Follow-up", "Counselling Done", "Negotiation" } },
+        //    { "Qualified", new List<string> { "Follow-up", "Counselling Done", "Negotiation" } },
+        //    { "Follow-up", new List<string> { "Counselling Done", "Negotiation" } },
+        //    { "Counselling Done", new List<string> { "Negotiation" } },
+        //    { "Negotiation", new List<string> { "Closed" } }
+        //    // Add other transitions as needed
+        //};
 
- 
-            //public async Task<Dictionary<string, List<string>>> GetStatusTransitionsAsync()
-            //{
-            //    var statuses = await context.commonStatuses
-            //        .Where(s => s.IsDeleted == false)
-            //        .OrderBy(s => s.StatusId) // Assuming StatusId defines the order
-            //        .Select(s => s.StatusName)
-            //        .ToListAsync();
 
-            //    var statusTransitions = new Dictionary<string, List<string>>();
+        //public async Task<Dictionary<string, List<string>>> GetStatusTransitionsAsync()
+        //{
+        //    var statuses = await context.commonStatuses
+        //        .Where(s => s.IsDeleted == false)
+        //        .OrderBy(s => s.StatusId) // Assuming StatusId defines the order
+        //        .Select(s => s.StatusName)
+        //        .ToListAsync();
 
-            //    for (int i = 0; i < statuses.Count; i++)
-            //    {
-            //        var currentStatus = statuses[i];
-            //        var nextStatuses = statuses.Skip(i + 1).ToList();
-            //        statusTransitions[currentStatus] = nextStatuses;
-            //    }
+        //    var statusTransitions = new Dictionary<string, List<string>>();
 
-            //    return statusTransitions;
-            //}
+        //    for (int i = 0; i < statuses.Count; i++)
+        //    {
+        //        var currentStatus = statuses[i];
+        //        var nextStatuses = statuses.Skip(i + 1).ToList();
+        //        statusTransitions[currentStatus] = nextStatuses;
+        //    }
+
+        //    return statusTransitions;
+        //}
 
 
 
@@ -734,7 +749,7 @@ namespace LMS.DAL.Repositories
         public async Task<LeadMaster> GetLeadByIdAsync(int leadId)
         {
             return await context.leads
-                .FirstOrDefaultAsync(l => l.LeadId == leadId && l.IsDeleted== false);
+                .FirstOrDefaultAsync(l => l.LeadId == leadId && l.IsDeleted == false);
         }
 
         public async Task<CommonStatus> GetStatusByNameAsync(string statusName)
