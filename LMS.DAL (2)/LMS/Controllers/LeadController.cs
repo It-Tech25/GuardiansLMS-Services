@@ -388,18 +388,18 @@ namespace LMS.Controllers
             else
                 return StatusCode(result.statusCode, result);
         }
-        [HttpPost("UpdateLeadNote")]
-        public IActionResult UpdateLeadNote([FromBody] AddLeadNoteDto noteDto)
-        {
-            var userId = int.Parse(User.FindFirstValue("UserID"));
+        //[HttpPost("UpdateLeadNote")]
+        //public IActionResult UpdateLeadNote([FromBody] AddLeadNoteDto noteDto)
+        //{
+        //    var userId = int.Parse(User.FindFirstValue("UserID"));
 
-            var result = lService.UpdateLeadNote(noteDto);
+        //    var result = lService.UpdateLeadNote(noteDto);
 
-            if (result.statusCode == 200)
-                return Ok(result);
-            else
-                return StatusCode(result.statusCode, result);
-        }
+        //    if (result.statusCode == 200)
+        //        return Ok(result);
+        //    else
+        //        return StatusCode(result.statusCode, result);
+        //}
 
 
 

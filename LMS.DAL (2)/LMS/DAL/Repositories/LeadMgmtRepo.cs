@@ -137,19 +137,32 @@ namespace LMS.DAL.Repositories
             try
             {
                 response = (from l in context.leads
-                            where l.IsDeleted == false && l.LeadId == id
-                            select new EditLeadModel
-                            {
-                                LeadId = l.LeadId,
-                                FromSource = l.FromSource,
-                                MobileNumber = l.MobileNumber,
-                                Email = l.Email,
-                                Name = l.Name,
-                                IntrestedCourse = l.InterestedCourse,
-                                AssignedUser = l.AssignedUserId,
-                                StatusId = l.StatusId,
-                                Note = context.leadNoteEntity.Where(a => a.LeadId == l.LeadId && l.IsDeleted == false).Select(a => a.NoteText).FirstOrDefault()
-                            }).FirstOrDefault();
+                                where l.IsDeleted == false && l.LeadId == id
+                                select new EditLeadModel
+                                {
+                                    LeadId = l.LeadId,
+                                    FromSource = l.FromSource,
+                                    MobileNumber = l.MobileNumber,
+                                    Email = l.Email,
+                                    Name = l.Name,
+                                    IntrestedCourse = l.InterestedCourse,
+                                    AssignedUser = l.AssignedUserId,
+                                    StatusId = l.StatusId,
+
+                                    Notes = (from note in context.leadNoteEntity
+                                             where note.LeadId == l.LeadId
+                                             orderby note.CreatedOn descending
+                                             select new NoteModel
+                                             {
+                                                 NoteText = note.NoteText,
+                                                 CreatedOn = note.CreatedOn,
+                                                 CreatedByUserName = context.userEntities
+                                                     .Where(u => u.UserId == note.CreatedBy)
+                                                     .Select(u => u.UserName)
+                                                     .FirstOrDefault()
+                                             }).ToList()
+                                }).FirstOrDefault();
+
             }
             catch (Exception ex) { }
             return response;
@@ -277,9 +290,8 @@ namespace LMS.DAL.Repositories
             GenericResponse response = new GenericResponse();
             try
             {
-                int count = context.leadNoteEntity.Where(a => a.LeadId == noteDto.LeadId).Count();
-                if (count == 0)
-                {
+               
+                
                     var note = new LeadNoteEntity
                     {
                         LeadId = noteDto.LeadId,
@@ -294,12 +306,7 @@ namespace LMS.DAL.Repositories
                     response.statusCode = 200;
                     response.Message = "Note added successfully";
                     response.CurrentId = note.LeadId;
-                }
-                else
-                {
-                    response.statusCode = 200;
-                    response.Message = "Alredy Note added By This Lead";
-                }
+               
             }
             catch (Exception ex)
             {

@@ -37,9 +37,14 @@ namespace LMS.Components.ModelClasses.Leads
         public string? IntrestedCourse { get; set; }
         public int? AssignedUser { get; set; }
         public int? StatusId { get; set; }
-        public string? Note { get; set; }
+        public List<NoteModel> Notes { get; set; }
     }
-
+    public class NoteModel
+    {
+        public string NoteText { get; set; }
+        public string CreatedByUserName { get; set; }
+        public DateTime CreatedOn { get; set; }
+    }
     public class LeadMasterUnAssignedListDTO
     {
         public int LeadId { get; set; }
@@ -205,6 +210,21 @@ namespace LMS.Components.ModelClasses.Leads
         public int ModifiedBy { get; set; }
     }
 
+    //public class LeadNoteDTO
+    //{
+    //    public int Id { get; set; }
+
+    //    public int LeadId { get; set; }
+
+    //    public string NoteText { get; set; }
+
+    //    public int CreatedBy { get; set; }
+
+    //    public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+
+    //    // Optional: navigation property
+    //    public virtual EditLeadModel Lead { get; set; }
+    //}
 
 
 }
