@@ -3,62 +3,118 @@ using LMS.BAL.Services;
 using LMS.Components.Entities;
 using LMS.DAL.Interfaces;
 using LMS.DAL.Repositories;
+using LMS.Mapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text.Json.Serialization;
-using System.Text;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.IdentityModel.Tokens.Jwt;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using LMS.Mapper;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ----------------- Services Configuration -----------------
 
 builder.Services.AddControllers();
 
-// Database connection service
+// Database connection
 builder.Services.AddDbContext<MyDbContext>(
-	options => options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnectionString")), ServiceLifetime.Transient);
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnectionString")),
+    ServiceLifetime.Transient);
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Swagger + JWT Security for Swagger UI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Other management services
-//builder.Services.AddTransient<INewsMgmtRepo, NewsMgmtRepo>();
-
-// Add memory cache
-builder.Services.AddMemoryCache();
-
-// Handling JSON null values
-builder.Services.Configure<JsonOptions>(options =>
-	options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull);
-
-// Configure form options
-builder.Services.Configure<FormOptions>(o =>
+builder.Services.AddSwaggerGen(c =>
 {
-	o.ValueLengthLimit = int.MaxValue;
-	o.MultipartBodyLengthLimit = int.MaxValue;
-	o.MemoryBufferThreshold = int.MaxValue;
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Trucks API Services",
+        Version = "v1"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme.\r\n\r\nExample: \"Bearer {your token}\""
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        {
+            new OpenApiSecurityScheme {
+                Reference = new OpenApiReference {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
 });
 
-// Add CORS policy
-builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
-{
-	builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
-}));
+// Memory cache
+builder.Services.AddMemoryCache();
 
-// JWT Token services
-builder.Services.AddScoped<ITokenService, TokenService>();
+// JSON null-handling
+builder.Services.Configure<JsonOptions>(options =>
+    options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull);
+
+// Form options for large uploads
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = int.MaxValue;
+    options.MemoryBufferThreshold = int.MaxValue;
+});
+
+// JWT Token Setup
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero,
+        ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
+        ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("corsapp", policy =>
+    {
+        policy.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
+// Dependency Injection
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-
-// Register UserMgmtRepo and UserMgmtService as Scoped
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserMgmtService, UserMgmtService>();
 builder.Services.AddScoped<IModuleMgmtService, ModuleMgmtService>();
 builder.Services.AddScoped<IUserMgmtRepo, UserMgmtRepo>();
@@ -77,85 +133,11 @@ builder.Services.AddScoped<IFeeReceiptRepository, FeeReceiptRepository>();
 builder.Services.AddScoped<IClassScheduleRepo, ClassScheduleRepo>();
 builder.Services.AddScoped<ICourseBatchRepo, CourseBatchRepo>();
 
+// ----------------- Application Pipeline -----------------
 
-
-//swagger
-
-//builder.Services.AddSwaggerGen();.
-builder.Services.AddSwaggerGen(c => {
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Trucks API Services",
-        Version = "v1"
-    });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-        {
-            new OpenApiSecurityScheme {
-                Reference = new OpenApiReference {
-                    Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
-});
-builder.Services.AddEndpointsApiExplorer();
-
-// handling nulls in json
-builder.Services.Configure<JsonOptions>(options =>
-         options.SerializerOptions.DefaultIgnoreCondition
-   = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull);
-
-builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
-{
-    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
-}));
-#region jwttoken settings
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
-JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
-builder.Services
-     .AddAuthentication(options =>
-     {
-         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-     });
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.SaveToken = true;
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
-            ValidAudience = builder.Configuration["Jwt:ValidAudience"],
-            ClockSkew = TimeSpan.Zero,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-        };
-    });
-#endregion
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
-}
+// Swagger UI
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -163,17 +145,23 @@ app.UseSwaggerUI(c =>
     c.DocumentTitle = "CRM API";
     c.DocExpansion(DocExpansion.List);
 });
-app.UseStaticFiles();//root folders
-// Configure the HTTP request pipeline.
-app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+// Serve static files from wwwroot
+app.UseStaticFiles();
+
+
+// Middleware order
+app.UseCors("corsapp");
+
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("corsapp");
+
+// Routing to controllers
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
-app.MapControllers();
 
 app.Run();
