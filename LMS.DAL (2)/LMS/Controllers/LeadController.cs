@@ -37,6 +37,41 @@ namespace LMS.Controllers
 
             return Ok(finalResponse);
         }
+        [HttpPost("AddBulkLead")]
+        public async Task<IActionResult> BulkUploadLeads(IFormFile file)
+        {
+            var userId = int.Parse(User.FindFirstValue("UserID"));
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest("Please upload a valid CSV file.");
+
+                var result = await lService.ProcessBulkLeadsAsync(file, userId);
+                return Ok(new { message = result });
+            }
+        }
+        [HttpGet("GetAllLeadsByUser")]
+        public IActionResult GetAllLeadsByUser(string searchterm="", int pagenumber = 1, int pagesize = 10)
+        {
+            var userId = int.Parse(User.FindFirstValue("UserID"));
+
+            // Assuming your service now returns a List<AllLeadMasterListDTO>
+            var list = lService.GetLeadListByUser(searchterm, userId);
+
+            var filtered = list.AsQueryable();
+
+            var skip = (pagenumber - 1) * pagesize;
+            var paged = filtered.Skip(skip).Take(pagesize).ToList();
+
+            return Ok(new
+            {
+                succeeded = true,
+                totalRecords = filtered.Count(),
+                data = paged
+            });
+        }
 
 
         [HttpGet("GetLeadById")]

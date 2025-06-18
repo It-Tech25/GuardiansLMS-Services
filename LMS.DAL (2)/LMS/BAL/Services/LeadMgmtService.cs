@@ -5,18 +5,23 @@ using LMS.Components.ModelClasses.Leads;
 using LMS.Components.Utilities;
 using LMS.DAL.Interfaces;
 using LMS.DAL.Repositories;
+using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using System.Text;
 
 namespace LMS.BAL.Services
 {
     public class LeadMgmtService : ILeadMgmtService
     {
         private readonly ILeadMgmtRepo lRepo;
+        private readonly MyDbContext context;
         private readonly ICommonDDRepo commonRepo;
 
-        public LeadMgmtService(ILeadMgmtRepo mRepo, ICommonDDRepo _commonRepo)
+        public LeadMgmtService(ILeadMgmtRepo mRepo, ICommonDDRepo _commonRepo, MyDbContext _context)
         {
             lRepo = mRepo;
             commonRepo = _commonRepo;
+            context = _context;
         }
 
         #region Lead Master Crud Operations
@@ -24,6 +29,10 @@ namespace LMS.BAL.Services
         public List<LeadMasterListDTO> GetLeadList(string search = "")
         {
             return lRepo.GetLeadList(search);
+        }
+       public List<LeadMasterListDTO> GetLeadListByUser(string search = "", int uid = 0)
+        {
+            return lRepo.GetLeadListByUser(search, uid);
         }
 
         public EditLeadModel GetLeadById(int id)
@@ -161,9 +170,67 @@ namespace LMS.BAL.Services
 
             return res;
         }
+        public async Task<string> ProcessBulkLeadsAsync(IFormFile file, int userId)
+        {
+            using var reader = new StreamReader(file.OpenReadStream(), Encoding.UTF8);
+            int processed = 0;
+
+            bool isFirstRow = true;
+            var statusType = commonRepo.GetStatusTypeByName("Leads");
+
+            while (!reader.EndOfStream)
+            {
+                var line = await reader.ReadLineAsync();
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                if (isFirstRow)
+                {
+                    isFirstRow = false;
+                    continue; // Skip header
+                }
+
+                var data = line.Split(',');
+
+                if (data.Length <= 7) continue;
+
+                string name = data[0]?.Trim();
+                string mobile = data[1]?.Trim();
+                string email = data[2]?.Trim();
+                string fromSource = data[3]?.Trim();
+                string interestedCourse = data[4]?.Trim();
+                string assignedUserRaw = data[5]?.Trim();
+                string statusName = data[6]?.Trim();
+
+                // Parse AssignedUserId
+                int assignedUserId = 0;
+                int.TryParse(assignedUserRaw, out assignedUserId);
+
+                // Determine status
+                var status = assignedUserId > 0
+                    ? commonRepo.GetStatusByName("Assigned", statusType.TypeId)
+                    : commonRepo.GetStatusByName("Unassigned", statusType.TypeId);
+
+                var lead = new LeadMaster
+                {
+                    Name = name,
+                    MobileNumber = mobile,
+                    Email = email,
+                    FromSource = fromSource,
+                    InterestedCourse = interestedCourse,
+                    AssignedUserId = assignedUserId,
+                    StatusId = status?.StatusId ?? 0,
+                    CreatedBy=userId
+                };
+
+                await lRepo.AddLeadAsync(lead);
+                processed++;
+            }
+
+            return $"{processed} leads uploaded successfully.";
+        }
         #endregion
-        
-       
+
+
 
         public GenericResponse AddLeadNote(AddLeadNoteDto noteDto,int Userid)
         {

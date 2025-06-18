@@ -11,8 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 
-
-
 namespace LMS.DAL.Repositories
 {
     public class LeadMgmtRepo : ILeadMgmtRepo
@@ -28,6 +26,33 @@ namespace LMS.DAL.Repositories
         }
 
         #region Lead Master Crud Operations
+        public List<LeadMasterListDTO> GetLeadListByUser(string search = "",int uid=0)
+        {
+            List<LeadMasterListDTO> response = new List<LeadMasterListDTO>();
+            try
+            {
+                StatusTypes leadstatus = context.statusTypes.Where(l => l.TypeName == "Leads" && l.IsDeleted == false).FirstOrDefault();
+                response = (from l in context.leads
+                            join s in context.commonStatuses on l.StatusId equals s.StatusId
+                            //join c in context.courseTypes on l.IntrestedCourse equals c.CourseId
+                            join u in context.userEntities on l.AssignedUserId equals u.UserId
+                            where l.IsDeleted == false && l.Name.Contains(search) && l.AssignedUserId==uid
+                            select new LeadMasterListDTO
+                            {
+                                LeadId = l.LeadId,
+                                FromSource = l.FromSource,
+                                MobileNumber = l.MobileNumber,
+                                Email = l.Email,
+                                Name = l.Name,
+                                IntrestedCourse = l.InterestedCourse,
+                                AssignedUser = u.UserName,
+                                Status = s.StatusName,
+                                CreatedOn = l.CreatedOn,
+                            }).ToList();
+            }
+            catch (Exception ex) { }
+            return response;
+        }
 
         public List<LeadMasterListDTO> GetLeadList(string search = "")
         {
@@ -236,6 +261,13 @@ namespace LMS.DAL.Repositories
             }
             catch (Exception ex) { }
         }
+
+        public async Task AddLeadAsync(LeadMaster lead)
+        {
+            context.leads.Add(lead);
+            await context.SaveChangesAsync();
+        }
+
 
         #endregion
 

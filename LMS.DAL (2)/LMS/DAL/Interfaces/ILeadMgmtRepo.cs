@@ -22,7 +22,9 @@ namespace LMS.DAL.Interfaces
 
         // Task<IEnumerable<AllLeadMasterListDTO>> AllGetLeads(LeadFilterDto filter, int currentUserId);
         List<AllLeadMasterListDTO> AllGetLeads(LeadFilterDto filter, int currentUserId);
-         Task<ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>>> GetUnassignedLeads(LeadFilterDto filter, int currentUserId);
+        List<LeadMasterListDTO> GetLeadListByUser(string search = "", int uid = 0);
+        Task AddLeadAsync(LeadMaster lead);
+        Task<ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>>> GetUnassignedLeads(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterAssignedListDTO>>> GetAssignedLeads(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterContactedListDTO>> >GetContactedLeads(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>> GetQualifiedLeads(LeadFilterDto filter, int currentUserId);

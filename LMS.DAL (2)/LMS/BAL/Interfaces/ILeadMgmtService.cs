@@ -14,11 +14,13 @@ namespace LMS.BAL.Interfaces
     public interface ILeadMgmtService
     {
         List<LeadMasterListDTO> GetLeadList(string search = "");
+        List<LeadMasterListDTO> GetLeadListByUser(string search = "", int uid = 0);
         EditLeadModel GetLeadById(int id);
         Task<ApiResponse<IEnumerable<LeadMasterQualifiedListDTO>>> GetNegotiationList(LeadFilterDto filter);
         GenericResponse AddEditLead(AddLeadModel req, int currentUserId);
         // Task<IEnumerable<AllLeadMasterListDTO>> AllGetLeads(LeadFilterDto filter, int currentUserId);
         List<AllLeadMasterListDTO> AllGetLeads(LeadFilterDto filter, int currentUserId);
+        Task<string> ProcessBulkLeadsAsync(IFormFile file,int UserId);
         Task<ApiResponse<IEnumerable<LeadMasterUnAssignedListDTO>>> GetUnassignedLeadsAsync(LeadFilterDto filter,int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterAssignedListDTO>>> GetAssignedLeadsAsync(LeadFilterDto filter, int currentUserId);
         Task<ApiResponse<IEnumerable<LeadMasterContactedListDTO>>> GetContactedLeadsAsync(LeadFilterDto filter, int currentUserId);
